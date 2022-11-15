@@ -9,7 +9,7 @@ db = client.dbsparta
 @app.route("/store", methods=['GET'])
 def render_store_detail():
     args = request.args
-    store_id = args.get('store_id') # insomnia sets the value to str by default
+    store_id = int(args.get('store_id')) # insomnia sets the value to str by default
     store_info = db.jason_dummy_stores.find_one({'store_id':store_id},{'_id':False})
 
     #convert store_address_xloc and yloc to float
