@@ -8,7 +8,7 @@ db = client.dbsparta
 
 @app.route("/store/like", methods=['POST'])
 def like_store():
-    store_id = request.form['store_id']
+    store_id = int(request.form['store_id'])
     # user_id will be obtained from cookie - below is for testing purpose
     user_id = int(request.form['user_id'])
     user_doc = db.jason_dummy_users.find_one({'user_id':user_id}, {'_id':False})
