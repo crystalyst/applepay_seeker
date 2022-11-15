@@ -24,4 +24,6 @@ htmlcov/
 .coverage.*
 *,cover
 
-# Pipenv, Pipenv-lock
+# Pipfile, Pipfile-lock
+Pipfile
+Pipfile.lock
