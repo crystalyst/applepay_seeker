@@ -8,7 +8,19 @@ db = client.dbsparta
 
 @app.route('/store/comment', methods=['POST'])
 def add_comment():
-    pass
+    store_id = int(request.form['store_id'])
+    # user_id will be included in the session/cookie - temp
+    user_id = int(request.form['user_id'])
+    content = request.form['content']
+
+    comment_doc = {
+        'user_id': user_id,
+        'store_id': store_id,
+        'content': content
+    }
+    db.jason_dummy_comments.insert_one(comment_doc)
+
+    return {'result': 'success'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000,debug=True)
