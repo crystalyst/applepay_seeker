@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="사과찾기"/>
+    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+    <meta property="og:image" content=""/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+{#    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e"></script>#}
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+
+    <title>find applepay store</title>
+    <style>
+        @font-face {
+            font-family: 'dunggeunmo';
+            font-weight: 400;
+            font-style: normal;
+            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'dunggeunmo';
+        }
+
+        .wrapper {
+            background-color: #cccccc;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid darkgray;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon {
+            display: block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .side_menu {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .side_menu::after {
+            display: block;
+            content: '';
+            clear: both;
+        }
+
+        .user {
+            float: left;
+            margin-right: 10px;
+            line-height: 30px;
+        }
+
+        .logout_btn {
+            float: right;
+            height: 30px;
+        }
+
+        .sub_title {
+            line-height: 30px;
+            margin-bottom: 20px;
+        }
+
+        .sub_title > .icon {
+            margin-right: 10px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        select, option:hover {
+            cursor: pointer;
+        }
+
+        .tags {
+            padding: 20px 0;
+        }
+
+        .tag {
+            margin-right: 5px;
+            padding: 20px;
+            border-radius: 35px;
+        }
+
+        .search {
+            display: none;
+            border: 1px solid blue;
+            background-color: #cccccc;
+            max-width: 500px;
+            width: 95%;
+            height: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -300px;
+            margin-left: -250px;
+        }
+
+        .modal_title {
+            width: 100%;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .close_btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .store_search_input {
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .map {
+            width: 100%;
+            height: 300px;
+            border: 1px solid red;
+        }
+
+        .search_result {
+            display: block;
+            margin-top: 20px;
+            border: 1px solid black;
+            width: 460px;
+            font-size: 12px;
+        }
+
+        thead {
+            width: 100%;
+            border-bottom: 1px solid black;
+        }
+
+        tbody {
+            display: block;
+            height: 120px;
+            overflow-y: scroll;
+        }
+
+        .search_result th:nth-of-type(1), .address_list td:nth-of-type(1) { width: 230px; }
+        .search_result th:nth-of-type(2), .address_list td:nth-of-type(2) { width: 130px; }
+        .search_result th:nth-of-type(3), .address_list td:nth-of-type(3) { width: 100px; }
+
+        tr:hover {
+            cursor: pointer;
+            border: 1px solid black;
+        }
+
+        .btn_wrapper {
+            margin-top: 20px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            getStore();
+        });
+
+        let store_id = 0
+        function getStore() {
+            // TODO: get store_id by query param
+            $.ajax({
+               type: "GET",
+                url: "/store/",
+                data: {
+                    'store_id': store_id
+                   },
+                success: function(response) {
+                    store_id = response['store_id']
+                    $('#storeName').attr('placeholder', response['store_name'])
+                    $('#storeAddress').attr('placeholder', response['store_address_full'])
+                    setLabel(response['store_label'])
+                }
+            })
+        }
+
+        function setLabel(labels) {
+            for(label of labels) {
+                let temp_html = `<span
+                                class='tag ${label}'
+                                style='${getTagStyle(label)}'
+                             >${label}
+                                <button
+                                    onclick='removeLabel("${label}")'
+                                    type="button"
+                                    class="btn-close"
+                                    aria-label="Close"
+                                >
+                                </button>
+                            </span>`
+
+                $('.tags').append(temp_html)
+                $('#selectLabel').val(label).prop("selected",true)
+                $('option:selected').remove()
+            }
+        }
+
+        function addLabel() {
+            const label = $('#selectLabel').val()
+
+            let temp_html = `<span
+                                class='tag ${label}'
+                                style='${getTagStyle(label)}'
+                             >${label}
+                                <button
+                                    onclick='removeLabel("${label}")'
+                                    type="button"
+                                    class="btn-close"
+                                    aria-label="Close"
+                                >
+                                </button>
+                            </span>`
+
+            $('.tags').append(temp_html)
+            $('option:selected').remove()
+        }
+
+        function removeLabel(label) {
+            let className = label
+            if(label.includes(' ')) {
+                className = label.replace(' ', '.')
+            }
+
+             $(`.${className}`).remove()
+
+             let option_html = `
+                <option value="${label}">${label} only</option>
+             `
+             $('select').append(option_html)
+        }
+
+        function getTagStyle(label) {
+            let style
+            switch (label) {
+                case 'visa':
+                    style = 'background-color: rgb(245,178,38)'
+                    break
+                case 'american express':
+                    style = 'background-color: rgb(1,111,208)'
+                    break
+                case 'master':
+                    style = 'background-color: rgb(236,13,27)'
+                    break
+                default:
+                    style = 'background-color: purple; color: white;'
+            }
+
+            return style
+        }
+
+        let map = {}
+        function showSearch() {
+            $('.search').show()
+            let container = $('.map')[0]
+            let options = {
+                // TODO: get map image by store xloc, yloc
+                center: new kakao.maps.LatLng(33.450701, 126.570667),
+                level: 3
+            }
+
+            map = new kakao.maps.Map(container, options)
+        }
+
+        let store_info = {}
+        function searchAddress() {
+            let places = new kakao.maps.services.Places();
+
+            let callback = function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    $('.address_list').children().remove()
+                    for(let i = 0; i < result.length; i++) {
+                        let data = JSON.stringify(result[i])
+                        let temp_html = `<tr onclick='selectAddress(${data})'>
+                            <td>${result[i].address_name}</td>
+                            <td>${result[i].place_name}</td>
+                            <td>${result[i].phone}</td>
+                        </tr>`
+
+                         $('.address_list').append(temp_html)
+                    }
+
+                }
+            };
+
+            let place_name = $('.store_search_input').val()
+            places.keywordSearch(place_name, callback);
+        }
+
+        function hideSearch() {
+            $('.search').hide()
+            map = {}
+        }
+
+        function selectAddress(address) {
+            store_info = address
+            $('#storeName').val(store_info.place_name)
+            $('#storeAddress').val(store_info.address_name)
+
+            hideSearch()
+        }
+
+        function updateStorePost() {
+            let labels = []
+            let tags = $('.tag')
+            for (let i = 0; i < tags.length; i++) {
+                labels.push(tags[i].innerText.trim())
+            }
+
+            if(store_id == 0 || store_info == {}) {
+              alert("잘못된 가맹점 정보입니다.")
+              window.location.href = '/user'
+              return
+            }
+
+            let store_data = {
+                store_id: store_id,
+                store_name: store_info.place_name,
+                store_address_full: store_info.address_name,
+                // TODO: get store_address_district by parsing store_address_full
+                store_address_district: "서울시 송파구",
+                store_address_xloc: store_info.x,
+                store_address_yloc: store_info.y,
+                store_label: labels,
+            }
+
+            $.ajax({
+                type: "PUT",
+                url: "/api/store/post",
+                data: store_data,
+                success: function(response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
+
+        function deleteStorePost() {
+            if(store_id == 0) {
+              alert("잘못된 가맹점 정보입니다.")
+              window.location.href = '/user'
+              return
+            }
+
+            if (confirm("가맹점 정보를 삭제하시겠습니까?")) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/api/store/post",
+                    data: {
+                        store_id: store_id
+                    },
+                    success: function(response) {
+                        alert(response['msg'])
+                        window.location.href = '/user'
+                    }
+                })
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h3 class="title">
+            <span style="margin-right: 10px;">사과</span>
+            <span class="icon">🍎</span>
+            <span style="margin-left: 10px;">찾기</span>
+        </h3>
+        <div class="side_menu">
+            <div class="user"> 😎 <a href="/user">유진</a> 님 오늘도 🍎 찾아가세요!</div>
+            <button class="logout_btn">LOGOUT</button>
+        </div>
+    </div>
+    <div class="content">
+        <h5 class="sub_title"><span class="icon">🚩</span>가맹점 수정하기</h5>
+        <div class="left_content">
+            <div class="input-group mb-3">
+                <input disabled type="text" id="storeName" class="form-control" placeholder="가맹점을 검색해 주세요"
+                       aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">주소</span>
+                <input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
+                       aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="selectLabel">특이사항</label>
+                <select class="form-select" id="selectLabel" onchange="addLabel()">
+                    <option selected>특이사항을 선택해주세요</option>
+                    <option value="visa">visa only</option>
+                    <option value="american express">amex only</option>
+                    <option value="master">master only</option>
+                    <option value="kiosk">kiosk only</option>
+                </select>
+            </div>
+            <div class="tags"></div>
+        </div>
+        <div class="right_content">
+
+        </div>
+        <div class="search">
+            <div class="modal_title">가맹점 검색</div>
+            <div class="close_btn">
+                <button onclick="hideSearch()" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="content">
+                <div class="input-group mb-3">
+                    <input type="text" class="store_search_input" placeholder="가맹점을 검색해 주세요"
+                           aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <button onclick='searchAddress()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+                </div>
+                <div class="map"></div>
+                <table class="search_result">
+                    <thead>
+                        <tr>
+                            <th>주소</th>
+                            <th>상호명</th>
+                            <th>연락처</th>
+                        </tr>
+                    </thead>
+                    <tbody class="address_list">
+                        <tr>
+                            <td style="width: 460px; text-align: center">검색 결과가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="btn_wrapper">
+            <button class="update_btn" onclick="updateStorePost()">수정하기</button>
+            <button class="delete_btn" onclick="deleteStorePost()">삭제하기</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
