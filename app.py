@@ -20,7 +20,7 @@ def like_store():
         current_like_list.append(store_id)
         store_like_total += 1
     else:
-        current_like_list.pop(store_id)
+        current_like_list.remove(store_id)
         store_like_total -= 1
 
     db.jason_dummy_users.update_one({'user_id': user_id}, {'$set': {'user_like': current_like_list}})
