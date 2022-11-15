@@ -12,7 +12,6 @@ def like_store():
     # user_id will be obtained from cookie - below is for testing purpose
     user_id = int(request.form['user_id'])
     user_doc = db.jason_dummy_users.find_one({'user_id':user_id}, {'_id':False})
-    print(user_doc)
     current_like_list = user_doc['user_like']
     store_doc = db.jason_dummy_stores.find_one({'store_id':store_id}, {'_id':False})
     store_like_total = store_doc['store_like']
