@@ -1,17 +1,32 @@
-import jwt
 import certifi
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 app = Flask(__name__)
 
 from pymongo import MongoClient
 cert = certifi.where()
-# test url
-client = MongoClient('mongodb+srv://yjsohn:sparta@cluster0.v3x09yn.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=cert)
-db = client.dbapplepay_test
+client = MongoClient('Replace This With your Atlas Endpoint', tlsCAFile=cert)
+db = client.dbsparta # Replace with your collection name
+
+import jwt
+import datetime
+import hashlib
+SECRET_KEY = 'sparta'
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.user.find_one({"user_email": payload['email']})
+        return render_template('index.html', user_name=user_info["user_name"], user_address_district=user_info["user_address_district"])
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 @app.route('/store/add')
 def store_add():
@@ -21,8 +36,71 @@ def store_add():
 def store_update():
     return render_template('store_update.html')
 
-@app.route("/api/store", methods=["GET"])
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    user_email = request.form['user_email']
+    user_name = request.form['user_name']
+    user_pw = request.form['user_pw']
+    user_address_district = request.form['user_address_district']
 
+    pw_hash = hashlib.sha256(user_pw.encode('utf-8')).hexdigest()
+
+    db.user.insert_one({
+        'user_email': user_email,
+        'user_name': user_name,
+        'user_pw': pw_hash,
+        'user_address_district': user_address_district
+    })
+
+    return jsonify({'status': 200, 'msg': '회원가입이 완료되었습니다.'})
+
+@app.route('/api/email/check', methods=['GET'])
+def api_email_check():
+    args = request.args
+    email_receive = args.get('user_email')
+    user = db.user.find_one({'user_email': email_receive})
+    if user is None:
+        return jsonify({'status': 200, 'msg': '사용 가능한 이메일 입니다.'})
+    else:
+        return jsonify({'status': 400, 'msg': '이미 사용 중인 이메일 입니다.'})
+
+@app.route('/api/name/check', methods=['GET'])
+def api_nickname_check():
+    args = request.args
+    nickname_receive = args.get('user_name')
+    user = db.user.find_one({'user_name': nickname_receive})
+    if user is None:
+        return jsonify({'status': 200, 'msg': '사용 가능한 닉네임 입니다.'})
+    else:
+        return jsonify({'status': 400, 'msg': '이미 사용 중인 닉네임 입니다.'})
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    email_receive = request.form['user_email']
+    pw_receive = request.form['user_pw']
+
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+    result = db.user.find_one({'user_email': email_receive, 'user_pw': pw_hash},{'_id':False})
+    if result is not None:
+        payload = {
+            'email': email_receive,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        return jsonify({'status': 200, 'msg': '로그인이 완료되었습니다.', 'token': token})
+    else:
+        return jsonify({'status': 404, 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+@app.route('/api/store/list', methods=['GET'])
+def render_store_list():
+    args = request.args
+    district_address = args.get('district_input')
+    store_list = list(db.jason_dummy_stores.find({ 'store_address_district': district_address }, {'_id':False}))
+    if len(store_list) > 0:
+        return {'state': 200, 'msg': 'Successfully Fetched the data', 'data': store_list} # store_list = array containing store object
+    return {'state': 404, 'msg': 'Data Not Found by Provided Key'}
+
+@app.route("/api/store", methods=["GET"])
 def get_store_post():
     store_id = request.args.get('store_id').strip()
     store_data = []
