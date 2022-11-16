@@ -196,8 +196,8 @@
         let user_address_yloc = 0
 
         $(document).ready(function () {
-            getUser();
-        });
+            getUser()
+        })
 
         function getUser() {
             $.ajax({
@@ -214,10 +214,16 @@
                     const data = response['data']
                     user_id = data['user_id']
                     user_nickname = data['user_nickname']
+                    setUser(user_id, user_nickname)
                     user_address_district = data['user_address_district']
                     getUserDistrictXYLoc(user_address_district)
                 }
             })
+        }
+
+        function setUser(id, nickname) {
+            let temp_html = `😎 <a href="/user?user-id=${id}">${nickname}</a> 님 오늘도 🍎 찾아가세요!`
+            $('.user').append(temp_html)
         }
 
         function getUserDistrictXYLoc(searchWord) {
@@ -414,7 +420,7 @@
             <span style="margin-left: 10px;">찾기</span>
         </h3>
         <div class="side_menu">
-            <div class="user"> 😎 <a href="/user">유진</a> 님 오늘도 🍎 찾아가세요!</div>
+            <div class="user"></div>
             <button class="logout_btn">LOGOUT</button>
         </div>
     </div>
