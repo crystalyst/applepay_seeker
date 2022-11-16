@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-{#    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e"></script>#}
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
 
@@ -190,6 +189,50 @@
     </style>
 
     <script>
+        let user_id = 0
+        let user_nickname = '사용자'
+        let user_address_district = ''
+        let user_address_xloc = 0
+        let user_address_yloc = 0
+
+        $(document).ready(function () {
+            getUser();
+        });
+
+        function getUser() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/user',
+                data: {},
+                success: function(response) {
+                    if(response['state'] > 200) {
+                        alert('사용자 정보를 가져오는데 실패했습니다.')
+                        window.location.href = '/'
+                        return
+                    }
+
+                    const data = response['data']
+                    user_id = data['user_id']
+                    user_nickname = data['user_nickname']
+                    user_address_district = data['user_address_district']
+                    getUserDistrictXYLoc(user_address_district)
+                }
+            })
+        }
+
+        function getUserDistrictXYLoc(searchWord) {
+            let places = new kakao.maps.services.Places();
+
+            let callback = function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    user_address_xloc = result[0].x
+                    user_address_yloc = result[0].y
+                }
+            };
+
+            places.keywordSearch(searchWord, callback);
+        }
+
         function addLabel() {
             const label = $('#selectLabel').val()
 
@@ -247,11 +290,17 @@
             $('.search').show()
             let container = $('.map')[0]
             let options = {
-                center: new kakao.maps.LatLng(33.450701, 126.570667),
-                level: 3
+                center: new kakao.maps.LatLng(user_address_yloc, user_address_xloc),
+                level: 7
             }
-
             map = new kakao.maps.Map(container, options)
+
+            let markerPosition  = new kakao.maps.LatLng(user_address_yloc, user_address_xloc);
+            let marker = new kakao.maps.Marker({
+                position: markerPosition
+            });
+
+            marker.setMap(map);
         }
 
         let store_info = {}
@@ -261,7 +310,14 @@
             let callback = function(result, status) {
                 if (status === kakao.maps.services.Status.OK) {
                     $('.address_list').children().remove()
+                    let markers = []
                     for(let i = 0; i < result.length; i++) {
+                        let marker_data = {
+                            title: result[i].place_name,
+                            latlng: new kakao.maps.LatLng(result[i].y, result[i].x)
+                        }
+                        markers.push(marker_data)
+
                         let data = JSON.stringify(result[i])
                         let temp_html = `<tr onclick='selectAddress(${data})'>
                             <td>${result[i].address_name}</td>
@@ -272,6 +328,7 @@
                          $('.address_list').append(temp_html)
                     }
 
+                    resetMapImage(markers)
                 }
             };
 
@@ -279,7 +336,35 @@
             places.keywordSearch(place_name, callback);
         }
 
+        function resetMapImage(markers) {
+            console.log("resetmapImage")
+            // 지도를 재설정할 범위정보를 가지고 있을 LatLngBounds 객체를 생성합니다
+            const bounds = new kakao.maps.LatLngBounds();
+
+            for (let i = 0; i < markers.length; i++) {
+                // 배열의 좌표들이 잘 보이게 마커를 지도에 추가합니다
+                createMarker(markers[i])
+                // LatLngBounds 객체에 좌표를 추가합니다
+                bounds.extend(markers[i].latlng);
+            }
+
+            map.setBounds(bounds);
+        }
+
+        function createMarker(item) {
+            // 마커를 생성합니다
+            let marker = new kakao.maps.Marker({
+                map: map, // 마커를 표시할 지도
+                position: item.latlng, // 마커를 표시할 위치
+                title : item.title, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
+            });
+
+            marker.setMap(map);
+        }
+
         function hideSearch() {
+            $('.store_search_input').val('')
+            $('.address_list').children().remove()
             $('.search').hide()
             map = {}
         }
