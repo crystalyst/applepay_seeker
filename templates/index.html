@@ -210,10 +210,48 @@
             justify-content: flex-end;
         }
 
+        .add_post_modal {
+            display: none;
+            position: fixed;
+            top: 60%;
+            left: 85%;
+            margin-top: -300px;
+            margin-left: -250px;
+            max-width: 500px;
+            width: 95%;
+            height: 600px;
+            padding: 20px;
+            background-color: #cccccc;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
     </style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
+<script type="text/javascript" src="../static/js/render_map.js"></script>
     <script>
+        let userLogout = () => {
+            $.removeCookie('token', {path: '/'});
+            window.location.href = '/login'
+        }
 
+        let storeAddPage = () => {
+            window.location.href = '/store/add'
+        }
 
+        function showAddPost() {
+            $('.add_post_modal').show()
+        }
+
+        function hideAddPost() {
+            $('.login_email_input').val('')
+            $('.login_password_input').val('')
+            $('.add_post_modal').hide()
+        }
     </script>
 </head>
 <body>
@@ -226,8 +264,8 @@
             <span style="margin-left: 10px;">찾기</span>
         </h3>
         <div class="side_menu">
-            <div class="user"> 😎 <a href="/user">유진</a> 님 오늘도 🍎 찾아가세요!</div>
-            <button class="logout_btn">LOGOUT</button>
+            <div class="user"> 😎 <a href="/user">{{ user_name }}</a> 님 오늘도 🍎 찾아가세요!</div>
+            <button class="logout_btn" onclick="userLogout()">LOGOUT</button>
         </div>
     </div>
     <div class="content_wrapper">
@@ -235,19 +273,14 @@
 
         <div id="map" style="width:100%;height:350px;"></div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
-<script type="text/javascript" src="../static/js/render_map.js"></script>
-<script>
 
-
-</script>
 
 <script>
+    let name = `{{ user_name }}`;
+    let init_district = `{{ user_address_district }}`;
     document.addEventListener("DOMContentLoaded", function() {
         // Take user's district info
-        let value = '송파구'
-        first_district(value)
+        get_district(init_district);
     });
 
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div
@@ -272,12 +305,104 @@
         draw_district(zero_district);
     })
 
-    let get_district = () => {
-        let zero_district = changeDistrict()
+    let get_district = (district) => {
+        let zero_district = district
+        $.ajax({
+            type: "GET",
+            url: "/api/store/list",
+            data: {'district_input': zero_district},
+            success: function (response) {
+                $('#store_queue').empty();
+                target_district_store_list = response['data']
+                console.log(response)
+                if (typeof target_district_store_list == "undefined") {
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/store/map",
+                        data: {'address_district_give': zero_district},
+                        success: function (response) {
+                            target_district = response['district']
+                            // Drawing Map
+                            geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
+                                // 정상적으로 검색이 완료됐으면
+                                if (status === kakao.maps.services.Status.OK) {
+
+                                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                                    // 결과값으로 받은 위치를 마커로 표시합니다
+                                    var marker = new kakao.maps.Marker({
+                                        map: map,
+                                        position: coords
+                                    });
+
+                                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                    var infowindow = new kakao.maps.InfoWindow({
+                                        content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
+                                    });
+                                    infowindow.open(map, marker);
+
+                                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                                    map.setCenter(coords);
+                                }
+                            });
+                        }
+                    });
+                }
+                else {
+                    for (let i = 0; i < target_district_store_list.length; i++) {
+                        store_id = target_district_store_list[i]['store_id']
+                        store_name = target_district_store_list[i]['store_name']
+                        store_address_full = target_district_store_list[i]['store_address_full']
+
+                        //temp_html = `<button>${store_name} : ${store_address_full}</button>`
+                        temp_html = `<div class="input-group mb-3">
+                                        <input disabled type="text" id="storeAddress" value="${store_name} : ${store_address_full}" class="form-control" aria-label="Username"
+                                               aria-describedby="basic-addon1">
+                                        <button onclick="" class="btn btn-outline-secondary" type="button" id="button-addon2">가맹점 정보</button>
+                                    </div>`
+                        $('#store_queue').append(temp_html);
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/store/map",
+                        data: {'address_district_give': zero_district},
+                        success: function (response) {
+                            target_district = response['district']
+                            // Drawing Map
+                            geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
+                                // 정상적으로 검색이 완료됐으면
+                                if (status === kakao.maps.services.Status.OK) {
+
+                                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                                    // 결과값으로 받은 위치를 마커로 표시합니다
+                                    var marker = new kakao.maps.Marker({
+                                        map: map,
+                                        position: coords
+                                    });
+
+                                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                    var infowindow = new kakao.maps.InfoWindow({
+                                        content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
+                                    });
+                                    infowindow.open(map, marker);
+
+                                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                                    map.setCenter(coords);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        })
+    }
+    let draw_district = (district) => {
+        let zero_district = district
         $.ajax({
             type: "GET",
             url: "/store/list",
-            data: {'user_address_district': zero_district},
+            data: {'district_input': zero_district},
             success: function (response) {
                 $('store_queue').empty();
                 target_district_store_list = response['store_list']
@@ -286,46 +411,15 @@
                     store_name = target_district_store_list[i]['store_name']
                     store_address_full = target_district_store_list[i]['store_address_full']
 
-                    temp_html = `<button>${store_name} : ${store_address_full}</button>`
+                    temp_html = `<input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
+                       aria-describedby="basic-addon1"><button onclick="" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>`
+
                     $('#store_queue').append(temp_html);
                 }
 
             }
         });
-    }
-    let draw_district = (district) => {
-        zero_district = district
-        $.ajax({
-            type: "POST",
-            url: "/store/map",
-            data: {'address_district_give': zero_district},
-            success: function (response) {
-                target_district = response['district']
-                // Drawing Map
-                geocoder.addressSearch(`서울 ${target_district}`, function(result, status) {
-                    // 정상적으로 검색이 완료됐으면
-                     if (status === kakao.maps.services.Status.OK) {
 
-                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                        // 결과값으로 받은 위치를 마커로 표시합니다
-                        var marker = new kakao.maps.Marker({
-                            map: map,
-                            position: coords
-                        });
-
-                        // 인포윈도우로 장소에 대한 설명을 표시합니다
-                        var infowindow = new kakao.maps.InfoWindow({
-                            content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
-                        });
-                        infowindow.open(map, marker);
-
-                        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
-                        map.setCenter(coords);
-                    }
-                });
-            }
-        });
     }
 
 </script>
@@ -335,7 +429,7 @@
         <div class="left_content">
             <div class="input-group mb-3">
                 <label class="input-group-text" for="selectLabel">서울시 구 지정</label>
-                <select class="form-select" id="selectDistrict" onchange="changeDistrict()" onclick="draw_district(changeDistrict())">
+                <select class="form-select" id="selectDistrict" onchange="changeDistrict()">
                     <option value="" selected></option>
                     <option value="강남구">강남구</option>
                     <option value="강동구">강동구</option>
@@ -363,6 +457,7 @@
                     <option value="중구">중구</option>
                     <option value="중랑구">중랑구</option>
                 </select>
+                <button onclick="get_district(changeDistrict())" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
             <!--
             </div>
 
@@ -385,6 +480,13 @@
                 <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
             -->
             </div>
+            <!--<div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">주소</span>
+                <input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
+                       aria-describedby="basic-addon1">
+                <button onclick="get_district(changeDistrict())" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+            </div>
+            -->
             <div class="input-group mb-3">
                 <div id="store_queue">
                     <button>송파구 : Burger King</button>
@@ -408,35 +510,32 @@
         <div class="right_content">
 
         </div>
-        <div class="search">
-            <div class="modal_title">가맹점 검색</div>
+        <!--
+        <div class="add_post_modal">
+            <div class="modal_header">
+                <span class="icon">🔑</span>
+                <div class="modal_title">로그인</div>
+            </div>
             <div class="close_btn">
-                <button onclick="hideSearch()" type="button" class="btn-close" aria-label="Close"></button>
+                <button onclick="hideAddPost()" type="button" class="btn-close" aria-label="Close"></button>
             </div>
-            <div class="content">
-                <div class="input-group mb-3">
-                    <input type="text" class="store_search_input" placeholder="가맹점을 검색해 주세요"
-                           aria-label="Recipient's username" aria-describedby="button-addon2">
-                    <button onclick='searchAddress()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+            <div class="modal_content">
+                <div>
+                    <p>아이디</p>
+                    <input onkeydown="validateLoginEmail()" onkeyup="validateLogin()" class="login_email_input" type="text" placeholder="이메일을 입력해주세요."/>
+                    <p class="validate_msg login email">올바르지 않은 이메일 형식입니다.</p>
                 </div>
-                <div class="map"></div>
-                <table class="search_result">
-                    <thead>
-                        <tr>
-                            <th>주소</th>
-                            <th>상호명</th>
-                            <th>연락처</th>
-                        </tr>
-                    </thead>
-                    <tbody class="address_list">
-                        <tr>
-                            <td style="width: 460px; text-align: center">검색 결과가 없습니다.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div>
+                    <p>비밀번호</p>
+                    <input onkeydown="validateLoginPassword()" onkeyup="validateLogin()" class="login_password_input" type="password" placeholder="비밀번호를 입력해주세요."/>
+                    <p class="validate_msg login pw">비밀번호는 한글, 영문, 숫자 혼합 8자 이상 입니다.</p>
+                </div>
+                <button disabled class="login_btn" onclick="login()">로그인</button>
             </div>
+
         </div>
-            <button class="add_btn" onclick="addStorePost()"><b>+</b></button>
+        -->
+            <button class="add_btn" onclick="storeAddPage()"><b>+</b></button>
     </div>
         <div class="empty_map"></div>
     </div>
