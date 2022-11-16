@@ -13,7 +13,8 @@ def map_test():
 
 @app.route('/store/map', methods=['POST'])
 def map_by_district():
-    district_receive = request.form['address_district_give']
+    print(request.form)
+    district_receive = request.form.get('address_district_give')
     return jsonify({'district':district_receive})
 
 if __name__ == '__main__':

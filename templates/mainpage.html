@@ -237,35 +237,19 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
+<script type="text/javascript" src="../static/js/render_map.js"></script>
 <script>
-    let first_district = (value) => {
-            geocoder.addressSearch(`서울 ${value}`, function(result, status) {
-                // 정상적으로 검색이 완료됐으면
-                 if (status === kakao.maps.services.Status.OK) {
-                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
 
-                    // 결과값으로 받은 위치를 마커로 표시합니다
-                    var marker = new kakao.maps.Marker({
-                        map: map,
-                        position: coords
-                    });
-
-                    // 인포윈도우로 장소에 대한 설명을 표시합니다
-                    var infowindow = new kakao.maps.InfoWindow({
-                        content: `<div style="width:150px;text-align:center;padding:6px 0;">${value}</div>`
-                    });
-                    infowindow.open(map, marker);
-
-                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
-                    map.setCenter(coords);
-                }
-            });
-
-    }
 
 </script>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Take user's district info
+        let value = '송파구'
+        first_district(value)
+    });
+
     var mapContainer = document.getElementById('map'), // 지도를 표시할 div
         mapOption = {
             center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
@@ -278,18 +262,24 @@
     // 주소-좌표 변환 객체를 생성합니다
     var geocoder = new kakao.maps.services.Geocoder();
 
-    // Take user's district info
-    let value = '송파구'
-    first_district(value)
+    let changeDistrict = () => {
+        dist = $('#selectDistrict option:selected').val();
+        console.log(dist)
+        return dist
+    }
 
-    let zero_district = $('#zeroing_district').val();
+    let district_grab = $("#selectDistrict").click(function() {
+        draw_district(zero_district);
+    })
 
     let get_district = () => {
+        let zero_district = changeDistrict()
         $.ajax({
             type: "GET",
             url: "/store/list",
             data: {'user_address_district': zero_district},
             success: function (response) {
+                $('store_queue').empty();
                 target_district_store_list = response['store_list']
                 for (let i = 0; i < target_district_store_list.length; i++){
                     store_id = target_district_store_list[i]['store_id']
@@ -303,7 +293,8 @@
             }
         });
     }
-    let draw_district = () => {
+    let draw_district = (district) => {
+        zero_district = district
         $.ajax({
             type: "POST",
             url: "/store/map",
@@ -344,33 +335,38 @@
         <div class="left_content">
             <div class="input-group mb-3">
                 <label class="input-group-text" for="selectLabel">서울시 구 지정</label>
-                <select class="form-select" id="selectLabel" onchange="addLabel()">
-                    <option selected>구별 검색</option>
-                    <option value="visa">강남구</option>
-                    <option value="american express">강동구</option>
-                    <option value="master">송파구</option>
-                    <option value="kiosk">kiosk only</option>
+                <select class="form-select" id="selectDistrict" onchange="changeDistrict()" onclick="draw_district(changeDistrict())">
+                    <option value="" selected></option>
+                    <option value="강남구">강남구</option>
+                    <option value="강동구">강동구</option>
+                    <option value="강북구">강북구</option>
+                    <option value="강서구">강서구</option>
+                    <option value="관악구">관악구</option>
+                    <option value="광진구">광진구</option>
+                    <option value="구로구">구로구</option>
+                    <option value="금천구">금천구</option>
+                    <option value="노원구">노원구</option>
+                    <option value="도봉구">도봉구</option>
+                    <option value="동대문구">동대문구</option>
+                    <option value="동작구">동작구</option>
+                    <option value="마포구">마포구</option>
+                    <option value="서대문구">서대문구</option>
+                    <option value="서초구">서초구</option>
+                    <option value="성동구">성동구</option>
+                    <option value="성북구">성북구</option>
+                    <option value="송파구">송파구</option>
+                    <option value="양천구">양천구</option>
+                    <option value="영등포구">영등포구</option>
+                    <option value="용산구">용산구</option>
+                    <option value="은평구">은평구</option>
+                    <option value="종로구">종로구</option>
+                    <option value="중구">중구</option>
+                    <option value="중랑구">중랑구</option>
                 </select>
-            </div>
             <!--
-            <div class="input-group mb-3">
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                      District
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                      <li><a class="dropdown-item" href="#">강남구</a></li>
-                      <li><a class="dropdown-item" href="#">강동구</a></li>
-                      <li><a class="dropdown-item" href="#">강북구</a></li>
-                      <li><a class="dropdown-item" href="#">강서구</a></li>
-                      <li><a class="dropdown-item" href="#">관악구</a></li>
-                      <li><a class="dropdown-item" href="#">광진구</a></li>
-                      <li><a class="dropdown-item" href="#">구로구</a></li>
-                      <li><a class="dropdown-item" href="#">금천구</a></li>
-                      <li><a class="dropdown-item" href="#">노원구</a></li>
-                      <li><a class="dropdown-item" href="#">도봉구</a></li>
-                      <li><a class="dropdown-item" href="#">동대문구</a></li>
-                      <li><a class="dropdown-item" href="#">동작구</a></li>
+            </div>
+
+
                       <li><a class="dropdown-item" href="#">마포구</a></li>
                       <li><a class="dropdown-item" href="#">서대문구</a></li>
                       <li><a class="dropdown-item" href="#">서초구</a></li>
@@ -387,8 +383,8 @@
                     </ul>
                 </div>
                 <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
-            </div>
             -->
+            </div>
             <div class="input-group mb-3">
                 <div id="store_queue">
                     <button>송파구 : Burger King</button>
