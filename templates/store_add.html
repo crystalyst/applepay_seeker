@@ -190,6 +190,13 @@
     </style>
 
     <script>
+        let user_address_xloc = 0
+        let user_address_yloc = 0
+        function getUser() {
+         // TODO: ajax getUser
+         // TODO: set user_address_xloc, yloc
+        }
+
         function addLabel() {
             const label = $('#selectLabel').val()
 
@@ -248,11 +255,17 @@
             $('.search').show()
             let container = $('.map')[0]
             let options = {
-                center: new kakao.maps.LatLng(33.450701, 126.570667),
+                center: new kakao.maps.LatLng(user_address_yloc, user_address_xloc),
                 level: 3
             }
-
             map = new kakao.maps.Map(container, options)
+
+            let markerPosition  = new kakao.maps.LatLng(user_address_yloc, user_address_xloc);
+            let marker = new kakao.maps.Marker({
+                position: markerPosition
+            });
+
+            marker.setMap(map);
         }
 
         let store_info = {}

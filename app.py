@@ -5,8 +5,9 @@ app = Flask(__name__)
 
 from pymongo import MongoClient
 cert = certifi.where()
-client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=cert)
-db = client.dbsparta
+# test url
+client = MongoClient('mongodb+srv://yjsohn:sparta@cluster0.v3x09yn.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=cert)
+db = client.dbapplepay_test
 
 @app.route('/')
 def home():
@@ -19,6 +20,18 @@ def store_add():
 @app.route('/store/update')
 def store_update():
     return render_template('store_update.html')
+
+@app.route("/api/store", methods=["GET"])
+
+def get_store_post():
+    store_id = request.args.get('store_id').strip()
+    store_data = []
+    if store_id :
+        store_data = db.store.find_one({'store_id': int(store_id)}, {'_id': False})
+    if store_data :
+        return jsonify({'state': 200, 'data': store_data})
+    else :
+        return jsonify({'state': 404, 'msg': '해당하는 가맹점 정보를 찾을 수 없습니다.'})
 
 @app.route("/api/store/post", methods=["POST"])
 def add_store_post():
