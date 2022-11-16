@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="사과찾기"/>
+    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+    <meta property="og:image" content=""/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+
+    <title>find applepay store</title>
+    <style>
+        @font-face {
+            font-family: 'dunggeunmo';
+            font-weight: 400;
+            font-style: normal;
+            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'dunggeunmo';
+        }
+
+        .wrapper {
+            background-color: #cccccc;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid darkgray;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon {
+            display: block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .side_menu {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .side_menu::after {
+            display: block;
+            content: '';
+            clear: both;
+        }
+
+        .user {
+            float: left;
+            margin-right: 10px;
+            line-height: 30px;
+        }
+
+        .logout_btn {
+            float: right;
+            height: 30px;
+        }
+
+        .sub_title {
+            line-height: 30px;
+            margin-bottom: 20px;
+        }
+
+        .sub_title > .icon {
+            margin-right: 10px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .content {
+            padding: 20px;
+            width: 30%;
+        }
+
+        select, option:hover {
+            cursor: pointer;
+        }
+
+        .tags {
+            padding: 20px 0;
+        }
+
+        .tag {
+            margin-right: 5px;
+            padding: 20px;
+            border-radius: 35px;
+        }
+
+        .search {
+            display: none;
+            border: 1px solid blue;
+            background-color: #cccccc;
+            max-width: 500px;
+            width: 95%;
+            height: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -300px;
+            margin-left: -250px;
+        }
+
+        .modal_title {
+            width: 100%;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .close_btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .store_search_input {
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .map {
+            width: 100%;
+            height: 300px;
+            border: 1px solid red;
+        }
+
+        .search_result {
+            display: block;
+            margin-top: 20px;
+            border: 1px solid black;
+            width: 460px;
+            font-size: 12px;
+        }
+
+        thead {
+            width: 100%;
+            border-bottom: 1px solid black;
+        }
+
+        tbody {
+            display: block;
+            height: 120px;
+            overflow-y: scroll;
+        }
+
+        .search_result th:nth-of-type(1), .address_list td:nth-of-type(1) { width: 230px; }
+        .search_result th:nth-of-type(2), .address_list td:nth-of-type(2) { width: 130px; }
+        .search_result th:nth-of-type(3), .address_list td:nth-of-type(3) { width: 100px; }
+
+        tr:hover {
+            cursor: pointer;
+            border: 1px solid black;
+        }
+
+        .add_btn {
+            margin-top: 20px;
+        }
+
+        .content_wrapper {
+            display: flex;
+        }
+
+        .map_frame {
+            display: flex;
+            width: 100%;
+        }
+
+        .empty_map {
+            width: 20%;
+            height: 300px;
+            border: 1px solid transparent;
+        }
+
+        .main_map {
+            width: 20%;
+            height: 300px;
+            border: 1px solid red;
+            justify-content: flex-end;
+        }
+
+    </style>
+    <script>
+
+
+    </script>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <h3 class="title">
+            <span style="margin-right: 10px;">사과</span>
+            <span class="icon">🍎</span>
+            <span style="margin-left: 10px;">찾기</span>
+        </h3>
+        <div class="side_menu">
+            <div class="user"> 😎 <a href="/user">유진</a> 님 오늘도 🍎 찾아가세요!</div>
+            <button class="logout_btn">LOGOUT</button>
+        </div>
+    </div>
+    <div class="content_wrapper">
+        <div class="empty_map"></div>
+
+        <div id="map" style="width:100%;height:350px;"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
+<script>
+    let first_district = (value) => {
+            geocoder.addressSearch(`서울 ${value}`, function(result, status) {
+                // 정상적으로 검색이 완료됐으면
+                 if (status === kakao.maps.services.Status.OK) {
+                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                    // 결과값으로 받은 위치를 마커로 표시합니다
+                    var marker = new kakao.maps.Marker({
+                        map: map,
+                        position: coords
+                    });
+
+                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                    var infowindow = new kakao.maps.InfoWindow({
+                        content: `<div style="width:150px;text-align:center;padding:6px 0;">${value}</div>`
+                    });
+                    infowindow.open(map, marker);
+
+                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                    map.setCenter(coords);
+                }
+            });
+
+    }
+
+</script>
+
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+        mapOption = {
+            center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+            level: 3 // 지도의 확대 레벨
+        };
+
+    // 지도를 생성합니다
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+    // 주소-좌표 변환 객체를 생성합니다
+    var geocoder = new kakao.maps.services.Geocoder();
+
+    // Take user's district info
+    let value = '송파구'
+    first_district(value)
+
+    let zero_district = $('#zeroing_district').val();
+
+    let get_district = () => {
+        $.ajax({
+            type: "GET",
+            url: "/store/list",
+            data: {'user_address_district': zero_district},
+            success: function (response) {
+                target_district_store_list = response['store_list']
+                for (let i = 0; i < target_district_store_list.length; i++){
+                    store_id = target_district_store_list[i]['store_id']
+                    store_name = target_district_store_list[i]['store_name']
+                    store_address_full = target_district_store_list[i]['store_address_full']
+
+                    temp_html = `<button>${store_name} : ${store_address_full}</button>`
+                    $('#store_queue').append(temp_html);
+                }
+
+            }
+        });
+    }
+    let draw_district = () => {
+        $.ajax({
+            type: "POST",
+            url: "/store/map",
+            data: {'address_district_give': zero_district},
+            success: function (response) {
+                target_district = response['district']
+                // Drawing Map
+                geocoder.addressSearch(`서울 ${target_district}`, function(result, status) {
+                    // 정상적으로 검색이 완료됐으면
+                     if (status === kakao.maps.services.Status.OK) {
+
+                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                        // 결과값으로 받은 위치를 마커로 표시합니다
+                        var marker = new kakao.maps.Marker({
+                            map: map,
+                            position: coords
+                        });
+
+                        // 인포윈도우로 장소에 대한 설명을 표시합니다
+                        var infowindow = new kakao.maps.InfoWindow({
+                            content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
+                        });
+                        infowindow.open(map, marker);
+
+                        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                        map.setCenter(coords);
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+
+        <div class="content">
+        <h5 class="sub_title"><span class="icon">🚩</span>가맹점 검색하기</h5>
+        <div class="left_content">
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="selectLabel">서울시 구 지정</label>
+                <select class="form-select" id="selectLabel" onchange="addLabel()">
+                    <option selected>구별 검색</option>
+                    <option value="visa">강남구</option>
+                    <option value="american express">강동구</option>
+                    <option value="master">송파구</option>
+                    <option value="kiosk">kiosk only</option>
+                </select>
+            </div>
+            <!--
+            <div class="input-group mb-3">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                      District
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                      <li><a class="dropdown-item" href="#">강남구</a></li>
+                      <li><a class="dropdown-item" href="#">강동구</a></li>
+                      <li><a class="dropdown-item" href="#">강북구</a></li>
+                      <li><a class="dropdown-item" href="#">강서구</a></li>
+                      <li><a class="dropdown-item" href="#">관악구</a></li>
+                      <li><a class="dropdown-item" href="#">광진구</a></li>
+                      <li><a class="dropdown-item" href="#">구로구</a></li>
+                      <li><a class="dropdown-item" href="#">금천구</a></li>
+                      <li><a class="dropdown-item" href="#">노원구</a></li>
+                      <li><a class="dropdown-item" href="#">도봉구</a></li>
+                      <li><a class="dropdown-item" href="#">동대문구</a></li>
+                      <li><a class="dropdown-item" href="#">동작구</a></li>
+                      <li><a class="dropdown-item" href="#">마포구</a></li>
+                      <li><a class="dropdown-item" href="#">서대문구</a></li>
+                      <li><a class="dropdown-item" href="#">서초구</a></li>
+                      <li><a class="dropdown-item" href="#">성동구</a></li>
+                      <li><a class="dropdown-item" href="#">성북구</a></li>
+                      <li><a class="dropdown-item" href="#">송파구</a></li>
+                      <li><a class="dropdown-item" href="#">양천구</a></li>
+                      <li><a class="dropdown-item" href="#">영등포구</a></li>
+                      <li><a class="dropdown-item" href="#">용산구</a></li>
+                      <li><a class="dropdown-item" href="#">은평구</a></li>
+                      <li><a class="dropdown-item" href="#">종로구</a></li>
+                      <li><a class="dropdown-item" href="#">중구</a></li>
+                      <li><a class="dropdown-item" href="#">중랑구</a></li>
+                    </ul>
+                </div>
+                <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+            </div>
+            -->
+            <div class="input-group mb-3">
+                <div id="store_queue">
+                    <button>송파구 : Burger King</button>
+                    <button>송파구 : 롯데리아</button>
+                </div>
+            </div>
+            <!--
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="selectLabel">특이사항</label>
+                <select class="form-select" id="selectLabel" onchange="addLabel()">
+                    <option selected>특이사항을 선택해주세요</option>
+                    <option value="visa">visa only</option>
+                    <option value="american express">amex only</option>
+                    <option value="master">master only</option>
+                    <option value="kiosk">kiosk only</option>
+                </select>
+            </div>
+            -->
+            <div class="tags"></div>
+        </div>
+        <div class="right_content">
+
+        </div>
+        <div class="search">
+            <div class="modal_title">가맹점 검색</div>
+            <div class="close_btn">
+                <button onclick="hideSearch()" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="content">
+                <div class="input-group mb-3">
+                    <input type="text" class="store_search_input" placeholder="가맹점을 검색해 주세요"
+                           aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <button onclick='searchAddress()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+                </div>
+                <div class="map"></div>
+                <table class="search_result">
+                    <thead>
+                        <tr>
+                            <th>주소</th>
+                            <th>상호명</th>
+                            <th>연락처</th>
+                        </tr>
+                    </thead>
+                    <tbody class="address_list">
+                        <tr>
+                            <td style="width: 460px; text-align: center">검색 결과가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            <button class="add_btn" onclick="addStorePost()"><b>+</b></button>
+    </div>
+        <div class="empty_map"></div>
+    </div>
+
+</div>
+</body>
+</html>
