@@ -18,8 +18,10 @@ def render_store_list_per_user():
             return {'state': 200, 'msg': 'Successfully Fetched the data',
                     'data': store_list_per_user}  # store_list = array containing store object
         return {'state': 404, 'msg': 'Data Not Found by Provided Key'}  # empty array
-    except TypeError: # exception handling just in case args.get('user_id') takes None or non-string value
-        return {'state': 400, 'msg': 'Bad Request - Invalid Input from client or no such user exists'}
+    except TypeError: # exception handling just in case args.get('user_id') takes non-string value
+        return {'state': 400, 'msg': 'Bad Request - Invalid Input from client'}
+    except ValueError: # exception handling just in case args.get('user_id') takes empty string
+        return {'state': 400, 'msg': 'Bad Request - No Such User Exists'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000,debug=True)
