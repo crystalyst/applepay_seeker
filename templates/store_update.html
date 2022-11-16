@@ -195,13 +195,42 @@
     </style>
 
     <script>
-        $(document).ready(function () {
-            getStore();
-        });
-
+        let user_id = 0
+        let user_nickname = '사용자'
         let store_id = 0
         let store_xloc = 0
         let store_yloc = 0
+
+        $(document).ready(function () {
+            getUser()
+            getStore()
+        })
+
+         function getUser() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/user',
+                data: {},
+                success: function(response) {
+                    if(response['state'] > 200) {
+                        alert('사용자 정보를 가져오는데 실패했습니다.')
+                        window.location.href = '/'
+                        return
+                    }
+
+                    const data = response['data']
+                    user_id = data['user_id']
+                    user_nickname = data['user_nickname']
+                    setUser(user_id, user_nickname)
+                }
+            })
+        }
+
+        function setUser(id, nickname) {
+            let temp_html = `😎 <a href="/user?user-id=${id}">${nickname}</a> 님 오늘도 🍎 찾아가세요!`
+            $('.user').append(temp_html)
+        }
+
         function getStore() {
             let searchParams = new URLSearchParams(location.search)
             for(const param of searchParams) {
@@ -370,8 +399,6 @@
 
             for (let i = 0; i < markers.length; i++) {
                 // 배열의 좌표들이 잘 보이게 마커를 지도에 추가합니다
-                {#marker = new kakao.maps.Marker({ position : markers[i].latlng });#}
-                {#marker.setMap(map);#}
                 createMarker(markers[i])
                 // LatLngBounds 객체에 좌표를 추가합니다
                 bounds.extend(markers[i].latlng);
@@ -445,7 +472,6 @@
 
             let store_address_city = store_info.address_name.split(' ')[0]
             let store_address_district = store_info.address_name.split(' ')[1]
-            console.log(store_address_city, store_address_district)
             if(!store_address_city.includes('서울')) {
                 alert("서울 외 지역은 현재 서비스 준비 중입니다.")
                 return
@@ -504,7 +530,7 @@
             <span style="margin-left: 10px;">찾기</span>
         </h3>
         <div class="side_menu">
-            <div class="user"> 😎 <a href="/user">유진</a> 님 오늘도 🍎 찾아가세요!</div>
+            <div class="user"></div>
             <button class="logout_btn">LOGOUT</button>
         </div>
     </div>
