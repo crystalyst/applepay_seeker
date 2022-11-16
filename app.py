@@ -18,8 +18,13 @@ def add_store_post():
     store_label = request.form.getlist(['store_label[]'])
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        store_list = db.store.find({}, {'_id': False})
-        store_id = len(list(store_list)) + 1
+        store_list = db.store.find({}, {'store_id': True, '_id': False})
+        if store_list:
+            store_id_sorted = sorted(list(store_list), key=lambda store: store['store_id'])
+            store_id = store_id_sorted[-1]['store_id']+1
+        else:
+            store_id = 1
+
         result = db.store.insert_one(
             {
                 'store_id': store_id,
