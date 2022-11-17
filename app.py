@@ -175,12 +175,15 @@ def add_store_post():
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
         store_list = list(db.store.find({}, {'store_id': True, '_id': False}))
+        store_id_recorder = 0
         if len(store_list) > 0:
             store_id_sorted = sorted(store_list, key=lambda store: store['store_id'])
             print(store_id_sorted, len(store_id_sorted))
             store_id = store_id_sorted[-1]['store_id'] + 1
+            store_id_recorder = store_id
         else:
             store_id = 1
+            store_id_recorder = store_id
 
         result = db.store.insert_one(
             {
@@ -193,6 +196,14 @@ def add_store_post():
                 'store_label': store_label
             })
         if result.inserted_id:
+            user_id = int(request.form['user_id'])
+            user_doc = db.user.find_one({'user_id': user_id}, {'_id':False})
+            user_post = user_doc['user_post']
+            user_post.append(store_id_recorder)
+            db.user.update_one({'user_id': user_id}, {'$set': {
+                'user_post': user_post,
+            }})
+
             return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 완료되었습니다.'})
 
     return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 실패했습니다.'})
