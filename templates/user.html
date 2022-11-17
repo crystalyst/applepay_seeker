@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
 
     <title>find applepay store</title>
     <style>
@@ -208,7 +207,6 @@
 
         function setUserID() {
             let searchParams = new URLSearchParams(location.search)
-            console.log(searchParams)
             for(const param of searchParams) {
                 if(param[0] == 'user-id') {
                     user_id = param[1]
@@ -224,15 +222,13 @@
                     user_id: user_id
                 },
                 success: function(response) {
-                    console.log(response)
                     if(response['state'] > 200) {
                         alert(response['msg'])
-                        // window.location.href = '/'
+                        window.location.href = '/'
                         return
                     }
 
                     const data = response['data']
-                    console.log(data)
                     setUserInfo(data['user_name'], data['user_email'], data['user_address_district'])
                 }
             })
@@ -254,7 +250,7 @@
                 success: function(response) {
                     if(response['state'] > 200) {
                         alert(response['msg'])
-                        // window.location.href = '/'
+                        window.location.href = '/'
                         return
                     }
 
