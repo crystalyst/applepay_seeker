@@ -273,14 +273,12 @@ def render_store_list_per_user():
         # Your collection name -> change it to applicable collection name!
         user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
         store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
-
-        return {'state': 200, 'msg': 'Successfully Fetched the data',
-                'data': store_list_per_user}  # store_list = array containing store object
+        return {'state': 200, 'data': store_list_per_user}  # store_list = array containing store object
     except TypeError: # exception handling just in case args.get('user_id') takes non-string value
-        return {'state': 400, 'msg': 'Bad Request - Invalid Input from client'}
+        return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
     except ValueError: # exception handling just in case args.get('user_id') takes empty string
-        return {'state': 400, 'msg': 'Bad Request - No Such User Exists'}
-        
+        return {'state': 400, 'msg': '없는 사용자 정보 입니다.'}
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
