@@ -183,8 +183,7 @@
                         window.location.href = '/login'
                         return
                     }
-
-                    $.cookie('mytoken', response['token']);
+                    $.cookie('token', response['token'])
                     window.location.href = '/'
                 }
             })
