@@ -199,7 +199,8 @@
     </style>
 
     <script>
-        let user_id = 0
+        let str_user_id = `{{ user_id }}`;
+        let user_id = parseInt(str_user_id);
 
         $(document).ready(function () {
             setUserID()
@@ -228,11 +229,13 @@
                         window.location.href = '/'
                         return
                     }
-
-                    const storeList = response['data']
-                    for(let i = 0; i < storeList.length; i++) {
-                        setUserStorePost(storeList[i])
+                    if (response['data'] !== null) {
+                        const storeList = response['data']
+                        for(let i = 0; i < storeList.length; i++) {
+                            setUserStorePost(storeList[i])
+                        }
                     }
+
                 }
             })
         }

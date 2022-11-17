@@ -1,13 +1,12 @@
 import certifi
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from pymongo import MongoClient
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-from pymongo import MongoClient
-
 cert = certifi.where()
-client = MongoClient('mongodb+srv://yjsohn:sparta@cluster0.v3x09yn.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=cert)
-db = client.dbapplepay_test # Replace with your collection name
+client = MongoClient('Replace with your Atlas Endpoint', tlsCAFile=cert)
+db = client.dbsparta # Replace with your collection name
 
 import jwt
 import datetime
@@ -174,12 +173,16 @@ def add_store_post():
     store_label = request.form.getlist('store_label[]')
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        store_list = db.store.find({}, {'store_id': True, '_id': False})
-        if store_list:
-            store_id_sorted = sorted(list(store_list), key=lambda store: store['store_id'])
+        store_list = list(db.store.find({}, {'store_id': True, '_id': False}))
+        store_id_recorder = 0
+        if len(store_list) > 0:
+            store_id_sorted = sorted(store_list, key=lambda store: store['store_id'])
+            print(store_id_sorted, len(store_id_sorted))
             store_id = store_id_sorted[-1]['store_id'] + 1
+            store_id_recorder = store_id
         else:
             store_id = 1
+            store_id_recorder = store_id
 
         result = db.store.insert_one(
             {
@@ -193,6 +196,14 @@ def add_store_post():
                 'store_like': 0,
             })
         if result.inserted_id:
+            user_id = int(request.form['user_id'])
+            user_doc = db.user.find_one({'user_id': user_id}, {'_id':False})
+            user_post = user_doc['user_post']
+            user_post.append(store_id_recorder)
+            db.user.update_one({'user_id': user_id}, {'$set': {
+                'user_post': user_post,
+            }})
+
             return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 완료되었습니다.'})
 
     return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 실패했습니다.'})
@@ -255,6 +266,32 @@ def render_user_data_by_id():
     except ValueError:
         return {'state': 400, 'msg': '잘못된 사용자 정보이거나 없는 사용자 정보 입니다.'}
 
+@app.route('/api/user/store/list', methods=['GET'])
+def render_store_list_per_user():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id')) # avoid KeyError
+        # Your collection name -> change it to applicable collection name!
+        user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+        store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+        return {'state': 200, 'data': store_list_per_user}  # store_list = array containing store object
+    except TypeError: # exception handling just in case args.get('user_id') takes non-string value
+        return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
+    except ValueError: # exception handling just in case args.get('user_id') takes empty string
+        return {'state': 400, 'msg': '없는 사용자 정보 입니다.'}
+
+@app.route('/api/user', methods=['GET'])
+def render_user_data_by_id():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id'))
+        user_doc = db.jason_dummy_users.find_one({ 'user_id': user_id }, {'_id': False})
+        return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
+
+    except TypeError:
+        return {'state': 400, 'msg': 'No user_id key provided'}
+    except ValueError:
+        return {'state': 400, 'msg': 'Invalid Input or No Such User'}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
