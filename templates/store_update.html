@@ -519,6 +519,12 @@
                 })
             }
         }
+
+        function logout() {
+            $.removeCookie('mytoken')
+            alert('로그아웃이 완료되었습니다.')
+            window.location.href='/login'
+        }
     </script>
 </head>
 <body>
@@ -531,7 +537,7 @@
         </h3>
         <div class="side_menu">
             <div class="user"></div>
-            <button class="logout_btn">LOGOUT</button>
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
         </div>
     </div>
     <div class="content">

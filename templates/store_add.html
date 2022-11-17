@@ -13,7 +13,6 @@
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
 
     <title>find applepay store</title>
     <style>
@@ -189,42 +188,12 @@
     </style>
 
     <script>
-        let user_id = 0
-        let user_nickname = '사용자'
-        let user_address_district = ''
         let user_address_xloc = 0
         let user_address_yloc = 0
 
         $(document).ready(function() {
-            getUser()
+            getUserDistrictXYLoc("{{ user_address_district }}")
         })
-
-        function getUser() {
-            $.ajax({
-                type: 'GET',
-                url: '/api/user',
-                data: {},
-                success: function(response) {
-                    if(response['state'] > 200) {
-                        alert('사용자 정보를 가져오는데 실패했습니다.')
-                        window.location.href = '/'
-                        return
-                    }
-
-                    const data = response['data']
-                    user_id = data['user_id']
-                    user_nickname = data['user_nickname']
-                    setUser(user_id, user_nickname)
-                    user_address_district = data['user_address_district']
-                    getUserDistrictXYLoc(user_address_district)
-                }
-            })
-        }
-
-        function setUser(id, nickname) {
-            let temp_html = `😎 <a href="/user?user-id=${id}">${nickname}</a> 님 오늘도 🍎 찾아가세요!`
-            $('.user').append(temp_html)
-        }
 
         function getUserDistrictXYLoc(searchWord) {
             let places = new kakao.maps.services.Places();
@@ -342,7 +311,6 @@
         }
 
         function resetMapImage(markers) {
-            console.log("resetmapImage")
             // 지도를 재설정할 범위정보를 가지고 있을 LatLngBounds 객체를 생성합니다
             const bounds = new kakao.maps.LatLngBounds();
 
@@ -392,7 +360,7 @@
             let store_data = {
                 store_name: store_info.place_name,
                 store_address_full: store_info.address_name,
-                store_address_district: "서울시 송파구",
+                store_address_district: store_info.address_name.split(' ')[1],
                 store_address_xloc: store_info.x,
                 store_address_yloc: store_info.y,
                 store_label: labels,
@@ -408,6 +376,12 @@
                 }
             })
         }
+
+        function logout() {
+            $.removeCookie('mytoken')
+            alert('로그아웃이 완료되었습니다.')
+            window.location.href='/login'
+        }
     </script>
 </head>
 <body>
@@ -419,8 +393,8 @@
             <span style="margin-left: 10px;">찾기</span>
         </h3>
         <div class="side_menu">
-            <div class="user"></div>
-            <button class="logout_btn">LOGOUT</button>
+            <div class="user">😎 <a href="/user?user-id={{ user_id }}">{{ user_name }}</a> 님 오늘도 🍎 찾아가세요!</div>
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
         </div>
     </div>
     <div class="content">
