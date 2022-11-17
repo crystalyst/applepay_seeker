@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="사과찾기"/>
+    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+    <meta property="og:image" content=""/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
+
+    <title>find applepay store</title>
+    <style>
+        @font-face {
+            font-family: 'dunggeunmo';
+            font-weight: 400;
+            font-style: normal;
+            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'dunggeunmo';
+        }
+
+        .wrapper {
+            background-color: #cccccc;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid darkgray;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon {
+            display: block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .side_menu {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .side_menu::after {
+            display: block;
+            content: '';
+            clear: both;
+        }
+
+        .user {
+            float: left;
+            margin-right: 10px;
+            line-height: 30px;
+        }
+
+        .logout_btn {
+            float: right;
+            height: 30px;
+        }
+
+        .sub_title {
+            line-height: 30px;
+            margin-bottom: 20px;
+        }
+
+        .sub_title > .icon {
+            margin-right: 10px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        select, option:hover {
+            cursor: pointer;
+        }
+
+        .tags {
+            padding: 20px 0;
+        }
+
+        .tag {
+            margin-right: 5px;
+            padding: 20px;
+            border-radius: 35px;
+        }
+
+        .search {
+            display: none;
+            border: 1px solid blue;
+            background-color: #cccccc;
+            max-width: 500px;
+            width: 95%;
+            height: 600px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -300px;
+            margin-left: -250px;
+        }
+
+        .modal_title {
+            width: 100%;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .close_btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .store_search_input {
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .map {
+            width: 100%;
+            height: 300px;
+            border: 1px solid red;
+        }
+
+        .search_result {
+            display: block;
+            margin-top: 20px;
+            border: 1px solid black;
+            width: 460px;
+            font-size: 12px;
+        }
+
+        thead {
+            width: 100%;
+            border-bottom: 1px solid black;
+        }
+
+        tbody {
+            display: block;
+            height: 120px;
+            overflow-y: scroll;
+        }
+
+        .search_result th:nth-of-type(1), .address_list td:nth-of-type(1) { width: 230px; }
+        .search_result th:nth-of-type(2), .address_list td:nth-of-type(2) { width: 130px; }
+        .search_result th:nth-of-type(3), .address_list td:nth-of-type(3) { width: 100px; }
+
+        tr:hover {
+            cursor: pointer;
+            border: 1px solid black;
+        }
+
+        .add_btn {
+            margin-top: 20px;
+        }
+    </style>
+
+    <script>
+        let str_user_id = `{{ user_id }}`;
+        let user_id = parseInt(str_user_id);
+        let user_address_xloc = 0
+        let user_address_yloc = 0
+
+        $(document).ready(function() {
+            getUserDistrictXYLoc("{{ user_address_district }}")
+        })
+
+        function getUserDistrictXYLoc(searchWord) {
+            let places = new kakao.maps.services.Places();
+
+            let callback = function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    user_address_xloc = result[0].x
+                    user_address_yloc = result[0].y
+                }
+            };
+
+            places.keywordSearch(searchWord, callback);
+        }
+
+        function addLabel() {
+            const label = $('#selectLabel').val()
+
+            let temp_html = `<span
+                                class='tag ${label}'
+                                style='${getTagStyle(label)}'
+                             >${label}
+                                <button
+                                    onclick='removeLabel("${label}")'
+                                    type="button"
+                                    class="btn-close"
+                                    aria-label="Close"
+                                >
+                                </button>
+                            </span>`
+            $('.tags').append(temp_html)
+            $('option:selected').remove()
+        }
+
+        function removeLabel(label) {
+            let className = label
+            if(label.includes(' ')) {
+                className = label.replace(' ', '.')
+            }
+
+             $(`.${className}`).remove()
+
+             let option_html = `
+                <option value="${label}">${label} only</option>
+             `
+             $('select').append(option_html)
+        }
+
+        function getTagStyle(label) {
+            let style
+            switch (label) {
+                case 'visa':
+                    style = 'background-color: rgb(245,178,38)'
+                    break
+                case 'american express':
+                    style = 'background-color: rgb(1,111,208)'
+                    break
+                case 'master':
+                    style = 'background-color: rgb(236,13,27)'
+                    break
+                default:
+                    style = 'background-color: purple; color: white;'
+            }
+
+            return style
+        }
+
+        let map = {}
+        function showSearch() {
+            $('.search').show()
+            let container = $('.map')[0]
+            let options = {
+                center: new kakao.maps.LatLng(user_address_yloc, user_address_xloc),
+                level: 7
+            }
+            map = new kakao.maps.Map(container, options)
+
+            let markerPosition  = new kakao.maps.LatLng(user_address_yloc, user_address_xloc);
+            let marker = new kakao.maps.Marker({
+                position: markerPosition
+            });
+
+            marker.setMap(map);
+        }
+
+        let store_info = {}
+        function searchAddress() {
+            let places = new kakao.maps.services.Places();
+
+            let callback = function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    $('.address_list').children().remove()
+                    let markers = []
+                    for(let i = 0; i < result.length; i++) {
+                        let marker_data = {
+                            title: result[i].place_name,
+                            latlng: new kakao.maps.LatLng(result[i].y, result[i].x)
+                        }
+                        markers.push(marker_data)
+                        let data = JSON.stringify(result[i])
+                        let temp_html = `<tr onclick='selectAddress(${data})'>
+                            <td>${result[i].address_name}</td>
+                            <td>${result[i].place_name}</td>
+                            <td>${result[i].phone}</td>
+                        </tr>`
+
+                         $('.address_list').append(temp_html)
+                    }
+
+                    resetMapImage(markers)
+                }
+            };
+
+            let place_name = $('.store_search_input').val()
+            places.keywordSearch(place_name, callback);
+        }
+
+        function resetMapImage(markers) {
+            // 지도를 재설정할 범위정보를 가지고 있을 LatLngBounds 객체를 생성합니다
+            const bounds = new kakao.maps.LatLngBounds();
+
+            for (let i = 0; i < markers.length; i++) {
+                // 배열의 좌표들이 잘 보이게 마커를 지도에 추가합니다
+                createMarker(markers[i])
+                // LatLngBounds 객체에 좌표를 추가합니다
+                bounds.extend(markers[i].latlng);
+            }
+
+            map.setBounds(bounds);
+        }
+
+        function createMarker(item) {
+            // 마커를 생성합니다
+            let marker = new kakao.maps.Marker({
+                map: map, // 마커를 표시할 지도
+                position: item.latlng, // 마커를 표시할 위치
+                title : item.title, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
+            });
+
+            marker.setMap(map);
+        }
+
+        function hideSearch() {
+            $('.store_search_input').val('')
+            $('.address_list').children().remove()
+            $('.search').hide()
+            map = {}
+        }
+
+        function selectAddress(address) {
+            store_info = address
+            $('#storeName').val(store_info.place_name)
+            $('#storeAddress').val(store_info.address_name)
+
+            hideSearch()
+        }
+
+        function addStorePost() {
+            let labels = []
+            let tags = $('.tag')
+            for (let i = 0; i < tags.length; i++) {
+                labels.push(tags[i].innerText.trim())
+            }
+
+            let store_data = {
+                user_id: user_id,
+                store_name: store_info.place_name,
+                store_address_full: store_info.address_name,
+                store_address_district: store_info.address_name.split(' ')[1],
+                store_address_xloc: store_info.x,
+                store_address_yloc: store_info.y,
+                store_label: labels,
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/api/store/post",
+                data: store_data,
+                success: function(response) {
+                    alert(response['msg'])
+                    window.location.reload()
+                }
+            })
+        }
+
+        function logout() {
+            $.removeCookie('mytoken')
+            alert('로그아웃이 완료되었습니다.')
+            window.location.href='/login'
+        }
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h3 class="title">
+            <span style="margin-right: 10px;">사과</span>
+            <span class="icon">🍎</span>
+            <span style="margin-left: 10px;">찾기</span>
+        </h3>
+        <div class="side_menu">
+            <div class="user">😎 <a href="/user?user-id={{ user_id }}">{{ user_name }}</a> 님 오늘도 🍎 찾아가세요!</div>
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+    <div class="content">
+        <h5 class="sub_title"><span class="icon">🚩</span>가맹점 추가하기</h5>
+        <div class="left_content">
+            <div class="input-group mb-3">
+                <input disabled type="text" id="storeName" class="form-control" placeholder="가맹점을 검색해 주세요"
+                       aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">주소</span>
+                <input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
+                       aria-describedby="basic-addon1">
+            </div>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="selectLabel">특이사항</label>
+                <select class="form-select" id="selectLabel" onchange="addLabel()">
+                    <option selected>특이사항을 선택해주세요</option>
+                    <option value="visa">visa only</option>
+                    <option value="american express">amex only</option>
+                    <option value="master">master only</option>
+                    <option value="kiosk">kiosk only</option>
+                </select>
+            </div>
+            <div class="tags"></div>
+        </div>
+        <div class="right_content">
+
+        </div>
+        <div class="search">
+            <div class="modal_title">가맹점 검색</div>
+            <div class="close_btn">
+                <button onclick="hideSearch()" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="content">
+                <div class="input-group mb-3">
+                    <input type="text" class="store_search_input" placeholder="가맹점을 검색해 주세요"
+                           aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <button onclick='searchAddress()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
+                </div>
+                <div class="map"></div>
+                <table class="search_result">
+                    <thead>
+                        <tr>
+                            <th>주소</th>
+                            <th>상호명</th>
+                            <th>연락처</th>
+                        </tr>
+                    </thead>
+                    <tbody class="address_list">
+                        <tr>
+                            <td style="width: 460px; text-align: center">검색 결과가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="add_btn" onclick="addStorePost()">게시하기</button>
+    </div>
+</div>
+</body>
+</html>
