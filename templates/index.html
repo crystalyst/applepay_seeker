@@ -1,269 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta property="og:title" content="사과찾기"/>
-    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
-    <meta property="og:image" content=""/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-            crossorigin="anonymous"></script>
-    <script type="text/javascript"
-            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
-    <script type="text/javascript" src="../static/js/render_map.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta property="og:title" content="사과찾기"/>
+<meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+<meta property="og:image" content=""/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+<script type="text/javascript"
+        src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services"></script>
+<script type="text/javascript" src="../static/js/render_map.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
-    <title>find applepay store</title>
-    <style>
-        @font-face {
-            font-family: 'dunggeunmo';
-            font-weight: 400;
-            font-style: normal;
-            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
-        }
+<title>find applepay store</title>
+<style>
+    @font-face {
+        font-family: 'dunggeunmo';
+        font-weight: 400;
+        font-style: normal;
+        src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+    }
 
-        body {
-            font-family: 'dunggeunmo';
-        }
+    body {
+        font-family: 'dunggeunmo';
+    }
 
-        .wrapper {
-            background-color: #cccccc;
-            width: 100%;
-            height: 100vh;
-        }
+    .wrapper {
+        background-color: #cccccc;
+        width: 100%;
+        height: 100vh;
+    }
 
-        .header {
-            position: relative;
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-bottom: 3px solid darkgray;
-        }
+    .header {
+        position: relative;
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 3px solid darkgray;
+    }
 
-        .title {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-        }
+    .title {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .icon {
-            display: block;
-            width: 50px;
-            height: 50px;
-            line-height: 50px;
-            text-align: center;
-            border-left: 3px solid darkgray;
-            border-top: 3px solid #eeeeee;
-            border-bottom: 3px solid #333333;
-            border-right: 3px solid #777777;
-        }
+    .icon {
+        display: block;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border-left: 3px solid darkgray;
+        border-top: 3px solid #eeeeee;
+        border-bottom: 3px solid #333333;
+        border-right: 3px solid #777777;
+    }
 
-        .side_menu {
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-        }
+    .side_menu {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+    }
 
-        .side_menu::after {
-            display: block;
-            content: '';
-            clear: both;
-        }
+    .side_menu::after {
+        display: block;
+        content: '';
+        clear: both;
+    }
 
-        .user {
-            float: left;
-            margin-right: 10px;
-            line-height: 30px;
-        }
+    .user {
+        float: left;
+        margin-right: 10px;
+        line-height: 30px;
+    }
 
-        .logout_btn {
-            float: right;
-            height: 30px;
-        }
+    .logout_btn {
+        float: right;
+        height: 30px;
+    }
 
-        .sub_title {
-            line-height: 30px;
-            margin-bottom: 20px;
-        }
+    .sub_title {
+        line-height: 30px;
+        margin-bottom: 20px;
+    }
 
-        .sub_title > .icon {
-            margin-right: 10px;
-            float: left;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-        }
+    .sub_title > .icon {
+        margin-right: 10px;
+        float: left;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
 
-        .content {
-            padding: 20px;
-            width: 30%;
-        }
+    .content_wrapper {
+        width: 100%;
+        padding: 30px;
+    }
 
-        select, option:hover {
-            cursor: pointer;
-        }
+    .content_wrapper::after {
+        display: block;
+        content: '';
+        clear: both;
+    }
 
-        .tags {
-            padding: 20px 0;
-        }
+    .left_content {
+        float: left;
+        width: 45%;
+        margin-right: 2%;
+        border-left: 3px solid darkgray;
+        border-top: 3px solid #eeeeee;
+        border-bottom: 3px solid #333333;
+        border-right: 3px solid #777777;
+    }
 
-        .tag {
-            margin-right: 5px;
-            padding: 20px;
-            border-radius: 35px;
-        }
+    .right_content {
+        float: right;
+        width: 45%;
+    }
 
-        .search {
-            display: none;
-            border: 1px solid blue;
-            background-color: #cccccc;
-            max-width: 500px;
-            width: 95%;
-            height: 600px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            margin-top: -300px;
-            margin-left: -250px;
-        }
+    .empty_map {
+        display: none;
+        width: 100%;
+        height: 70vh;
+        line-height: 70vh;
+        text-align: center;
+    }
 
-        .modal_title {
-            width: 100%;
-            margin: 10px 0;
-            text-align: center;
-        }
+    #map {
+        width: 100%;
+        height: 70vh;
+    }
 
-        .close_btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
+    .store_list {
+        width: 100%;
+        height: 326px;
+        border: 1px solid black;
+        overflow-y: scroll;
+    }
 
-        .store_search_input {
-            max-width: 400px;
-            width: 90%;
-        }
+    ul {
+        padding: 0;
+        margin: 0;
+    }
 
-        .map {
-            width: 100%;
-            height: 300px;
-            border: 1px solid red;
-        }
+    li {
+        list-style: none;
+        border-left: 3px solid darkgray;
+        border-top: 3px solid #eeeeee;
+        border-bottom: 3px solid #333333;
+        border-right: 3px solid #777777;
+    }
 
-        .search_result {
-            display: block;
-            margin-top: 20px;
-            border: 1px solid black;
-            width: 460px;
-            font-size: 12px;
-        }
+    li:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
 
-        thead {
-            width: 100%;
-            border-bottom: 1px solid black;
-        }
+    .store_detail {
+        width: 100%;
+        padding: 10px;
+        border-right: 2px solid darkgray;
+        border-bottom: 2px solid #eeeeee;
+        border-top: 2px solid #333333;
+        border-left: 2px solid #777777;
+    }
 
-        tbody {
-            display: block;
-            height: 120px;
-            overflow-y: scroll;
-        }
+    .tag {
+        padding: 10px;
+        margin-right: 5px;
+        border-radius: 25px;
+    }
 
-        .search_result th:nth-of-type(1), .address_list td:nth-of-type(1) {
-            width: 230px;
-        }
+    select, option:hover {
+        cursor: pointer;
+    }
 
-        .search_result th:nth-of-type(2), .address_list td:nth-of-type(2) {
-            width: 130px;
-        }
-
-        .search_result th:nth-of-type(3), .address_list td:nth-of-type(3) {
-            width: 100px;
-        }
-
-        tr:hover {
-            cursor: pointer;
-            border: 1px solid black;
-        }
-
-        .add_btn {
-            margin-top: 20px;
-        }
-
-        .content_wrapper {
-            display: flex;
-        }
-
-        .map_frame {
-            display: flex;
-            width: 100%;
-        }
-
-        .empty_map {
-            width: 20%;
-            height: 300px;
-            border: 1px solid transparent;
-        }
-
-        .main_map {
-            width: 20%;
-            height: 300px;
-            border: 1px solid red;
-            justify-content: flex-end;
-        }
-
-        .add_post_modal {
-            display: none;
-            position: fixed;
-            top: 60%;
-            left: 85%;
-            margin-top: -300px;
-            margin-left: -250px;
-            max-width: 500px;
-            width: 95%;
-            height: 600px;
-            padding: 20px;
-            background-color: #cccccc;
-            border-left: 3px solid darkgray;
-            border-top: 3px solid #eeeeee;
-            border-bottom: 3px solid #333333;
-            border-right: 3px solid #777777;
-        }
-
-    </style>
-    <script>
-        let userLogout = () => {
-            $.removeCookie('token', {path: '/'});
-            alert('로그아웃이 완료되었습니다.')
-            window.location.href = '/login'
-        }
-
-        let storeAddPage = () => {
-            window.location.href = '/store/add'
-        }
-
-        function showAddPost() {
-            $('.add_post_modal').show()
-        }
-
-        function hideAddPost() {
-            $('.login_email_input').val('')
-            $('.login_password_input').val('')
-            $('.add_post_modal').hide()
-        }
-    </script>
+    .add_store_post_btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 20px;
+        border-left: 3px solid darkgray;
+        border-top: 3px solid #eeeeee;
+        border-bottom: 3px solid #333333;
+        border-right: 3px solid #777777;
+    }
+</style>  
 </head>
 <body>
-
 <div class="wrapper">
     <div class="header">
         <h3 class="title">
@@ -273,220 +208,239 @@
         </h3>
         <div class="side_menu">
             <div class="user"> 😎 <a href="/user">{{ user_name }}</a> 님 오늘도 🍎 찾아가세요!</div>
-            <button class="logout_btn" onclick="userLogout()">LOGOUT</button>
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
         </div>
     </div>
     <div class="content_wrapper">
-        <div class="empty_map"></div>
+        <div class="left_content">
+            <div class="empty_map">지도를 로딩중 입니다...</div>
+            <div id="map"></div>
+        </div>
+        <div class="right_content">
+            <h5 class="sub_title"><span class="icon">🚩</span>지역별 가맹점 찾기</h5>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="selectLabel">지역</label>
+                <select class="form-select" id="selectDistrict" onchange="changeDistrict()">
+                    <option selected>지역을 선택해주세요</option>
+                </select>
+                <button onclick="getStoreListByDistrict(changeDistrict())" class="btn btn-outline-secondary" type="button"
+                        id="button-addon2">찾기
+                </button>
+            </div>
+            <div class="store_list">
+                <ul id="store_queue">
+                   <li>등록된 가맹점이 없습니다.</li>
+                </ul>
+            </div>
+        </div>
+        <button onclick="routeToStoreAddPage()" class="add_store_post_btn">➕</button>
+    </div>
+    <div class="empty_map"></div>
+</div>
+<script>
+    const districtList = [
+        '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+        '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+        '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'
+    ]
+    const mapContainer = $('#map')[0]
+    let mapOption = {
+        center: new kakao.maps.LatLng(33.450701, 126.570667),
+        level: 7
+    }
+    let map = new kakao.maps.Map(mapContainer, mapOption)
+    let geocoder = new kakao.maps.services.Geocoder()
 
-        <div id="map" style="width:100%;height:350px;"></div>
+    $(document).ready(function () {
+        initDistrictOption()
+        setMap('{{ user_address_district }}')
+        getStoreListByDistrict('{{ user_address_district }}')
+    });
 
+    function initDistrictOption() {
+        for(let i = 0; i < districtList.length; i++) {
+            let temp_html = `
+                    <option value="${districtList[i]}">${districtList[i]}</option>
+                `
+            if(districtList[i] == '{{ user_address_district }}') {
+                temp_html = `
+                    <option selected value="${districtList[i]}">${districtList[i]}</option>
+                `
+            }
+            $('#selectDistrict').append(temp_html)
+        }
+    }
 
-        <script>
-            let name = `{{ user_name }}`;
-            let init_district = `{{ user_address_district }}`;
-            document.addEventListener("DOMContentLoaded", function () {
-                // Take user's district info
-                get_district(init_district);
+    function setMap(district) {
+        geocoder.addressSearch(`서울 ${district}`, function (result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                let coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                setMapCenter(coords, district)
+            }
+        })
+    }
+
+    function setMapCenter(coords, district) {
+        var marker = new kakao.maps.Marker({
+            map: map,
+            position: coords
+        });
+
+        // Info Window
+        var infowindow = new kakao.maps.InfoWindow({
+            content: `<div style="width:150px;text-align:center;padding:6px 0;">${district}</div>`
+        });
+        infowindow.open(map, marker);
+
+        // Zeroing map
+        map.setCenter(coords);
+    }
+
+    function setMarker(coordsList) {
+        let markers = []
+        for(let i = 0; i < coordsList.length; i++) {
+            let marker = new kakao.maps.Marker({
+                map: map,
+                position: coordsList[i]
             });
 
-            var mapContainer = document.getElementById('map'),
-                mapOption = {
-                    center: new kakao.maps.LatLng(33.450701, 126.570667),
-                    level: 3
-                };
+            markers.push(marker)
+        }
 
-            var map = new kakao.maps.Map(mapContainer, mapOption);
-            var geocoder = new kakao.maps.services.Geocoder();
+        // Info Window
+        var infowindow = new kakao.maps.InfoWindow({
+            content: `<div style="width:150px;text-align:center;padding:6px 0;">${district}</div>`
+        });
+        infowindow.open(map, marker);
 
-            let changeDistrict = () => {
-                dist = $('#selectDistrict option:selected').val();
-                return dist
+        // Zeroing map
+        map.setCenter(coords);
+    }
+
+    function getStoreListByDistrict(district) {
+        $.ajax({
+            type: 'GET',
+            url: '/api/store/list',
+            data: {
+                'address_district': district
+            },
+            success: function(response) {
+                if(response['status'] > 200) {
+                    alert(response['msg'])
+                    return
+                }
+
+                const data = response['data']
+                $('.store_list').children().remove()
+                for(let i = 0; i < data.length; i++) {
+                    let className = data[i]['store_name'].split(" ")[0] + data[i]['store_id']
+                    let temp_html = `
+                        <li class="${className}">
+                            <div onclick="toggleStoreDetail(${data[i]['store_id']})">
+                                <div>${data[i]['store_address_full']}</div>
+                                <div>${data[i]['store_name']}</div>
+                                <div>${data[i]['store_like']}</div>
+                                <div>${data[i]['store_comment'].length}</div>
+                            </div>
+                        </li>
+                    `
+                    $('.store_list').append(temp_html)
+                }
             }
+        })
+    }
 
-            let district_grab = $("#selectDistrict").click(function () {
-                draw_district(zero_district);
-            })
+    function changeDistrict() {
+        let district = $('option:selected').val()
+        setMap(district)
+        getStoreListByDistrict(district)
+    }
 
-            let get_district = (district) => {
-                let zero_district = district
-                $.ajax({
-                    type: "GET",
-                    url: "/api/store/list",
-                    data: {'district_input': zero_district},
-                    success: function (response) {
-                        $('#store_queue').empty();
-                        target_district_store_list = response['data']
-                        if (typeof target_district_store_list == "undefined") {
-                            $.ajax({
-                                type: "POST",
-                                url: "/api/store/map",
-                                data: {'address_district_give': zero_district},
-                                success: function (response) {
-                                    target_district = response['district']
-                                    // Drawing Map
-                                    geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
-                                        if (status === kakao.maps.services.Status.OK) {
-                                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                                            // Marker
-                                            var marker = new kakao.maps.Marker({
-                                                map: map,
-                                                position: coords
-                                            });
+    let openedStoreID = 0
+    function toggleStoreDetail(store_id) {
+        if(openedStoreID == store_id) {
+            hideStoreDetail()
+            return
+        }
 
-                                            // Info Window
-                                            var infowindow = new kakao.maps.InfoWindow({
-                                                content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
-                                            });
-                                            infowindow.open(map, marker);
+        $.ajax({
+            type: "GET",
+            url: "/api/store",
+            data: {
+                store_id: store_id,
+            },
+            success: function (response) {
+                console.log(response)
+                const data = response['data']
+                const store_id = data['store_id']
+                const store_name = data['store_name']
+                const store_label = data['store_label']
+                const store_like = data['store_like']
+                const store_comment = data['store_comment']
 
-                                            // Zeroing map
-                                            map.setCenter(coords);
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            for (let i = 0; i < target_district_store_list.length; i++) {
-                                store_id = target_district_store_list[i]['store_id'];
-                                store_name = target_district_store_list[i]['store_name'];
-                                store_address_full = target_district_store_list[i]['store_address_full'];
-
-                                temp_html = `<div class="input-group mb-3">
-                                        <input disabled type="text" id="storeAddress ${store_id}" value="${store_name} : ${store_address_full}" class="form-control" aria-label="Username"
-                                               aria-describedby="basic-addon1">
-                                        <button onclick="dump_store_detail(${store_id})" class="btn btn-outline-secondary" type="button" id="button-addon2 store-${i}">가맹점 정보</button>
-                                    </div>`
-                                $('#store_queue').append(temp_html);
-                            }
-                            $.ajax({
-                                type: "POST",
-                                url: "/api/store/map",
-                                data: {'address_district_give': zero_district},
-                                success: function (response) {
-                                    target_district = response['district']
-                                    // Drawing Map
-                                    geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
-                                        if (status === kakao.maps.services.Status.OK) {
-                                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                                            // Marker
-                                            var marker = new kakao.maps.Marker({
-                                                map: map,
-                                                position: coords
-                                            });
-
-                                            // Info Window
-                                            var infowindow = new kakao.maps.InfoWindow({
-                                                content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
-                                            });
-                                            infowindow.open(map, marker);
-
-                                            // Zeroing map
-                                            map.setCenter(coords);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    }
-                })
+                openedStoreID = store_id
+                showStoreDetail(store_id, store_name, store_label, store_like, store_comment)
             }
-            let draw_district = (district) => {
-                let zero_district = district
-                $.ajax({
-                    type: "GET",
-                    url: "/store/list",
-                    data: {'district_input': zero_district},
-                    success: function (response) {
-                        $('store_queue').empty();
-                        target_district_store_list = response['store_list']
-                        for (let i = 0; i < target_district_store_list.length; i++) {
-                            store_id = target_district_store_list[i]['store_id']
-                            store_name = target_district_store_list[i]['store_name']
-                            store_address_full = target_district_store_list[i]['store_address_full']
+        })
+    }
 
-                            temp_html = `<input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
-                       aria-describedby="basic-addon1"><button onclick="" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>`
+    function showStoreDetail(store_id, store_name, store_label, store_like, store_comment) {
+        let label_html = []
+        for(let i = 0; i < store_label.length; i++) {
+            label_html.push(addLabel(store_label[i]))
+        }
 
-                            $('#store_queue').append(temp_html);
-                        }
-
-                    }
-                });
-
-            }
-
-            let dump_store_detail = (unique_store_id) => {
-                $.ajax({
-                    type: "GET",
-                    url: "/api/store",
-                    data: {'store_id': unique_store_id},
-                    success: function (response) {
-                        target_store_address_full = response['store_address_full'];
-                        target_store_address_label = response['store_label'];
-                        console.log(target_store_address_label, target_store_address_full)
-                    }
-                });
-
-            }
-
-        </script>
-
-        <div class="content">
-            <h5 class="sub_title"><span class="icon">🚩</span>가맹점 검색하기</h5>
-            <div class="left_content">
-                <div class="input-group mb-3">
-                    <label class="input-group-text" for="selectLabel">서울시 구 지정</label>
-                    <select class="form-select" id="selectDistrict" onchange="changeDistrict()">
-                        <option value="" selected></option>
-                        <option value="강남구">강남구</option>
-                        <option value="강동구">강동구</option>
-                        <option value="강북구">강북구</option>
-                        <option value="강서구">강서구</option>
-                        <option value="관악구">관악구</option>
-                        <option value="광진구">광진구</option>
-                        <option value="구로구">구로구</option>
-                        <option value="금천구">금천구</option>
-                        <option value="노원구">노원구</option>
-                        <option value="도봉구">도봉구</option>
-                        <option value="동대문구">동대문구</option>
-                        <option value="동작구">동작구</option>
-                        <option value="마포구">마포구</option>
-                        <option value="서대문구">서대문구</option>
-                        <option value="서초구">서초구</option>
-                        <option value="성동구">성동구</option>
-                        <option value="성북구">성북구</option>
-                        <option value="송파구">송파구</option>
-                        <option value="양천구">양천구</option>
-                        <option value="영등포구">영등포구</option>
-                        <option value="용산구">용산구</option>
-                        <option value="은평구">은평구</option>
-                        <option value="종로구">종로구</option>
-                        <option value="중구">중구</option>
-                        <option value="중랑구">중랑구</option>
-                    </select>
-                    <button onclick="get_district(changeDistrict())" class="btn btn-outline-secondary" type="button"
-                            id="button-addon2">찾기
-                    </button>
+        let temp_html = `
+            <div class="store_detail">
+                <div class="tags">
+                    <p style="margin: 0 0 10px 0;">특이사항</p>
+                    <div style="margin-bottom: 10px;">${label_html}</div>
                 </div>
-                <div class="input-group mb-3">
-                    <div id="store_queue">
-                        <button>송파구 : Burger King</button>
-                        <button>송파구 : 롯데리아</button>
-                    </div>
+                <div>
+                    <span style="margin-right: 5px;">🍎 ${store_like}</span><span>💬 ${store_comment}</span>
                 </div>
-
-                <div class="tags"></div>
             </div>
-            <div class="right_content">
+        `
+        let className = store_name.split(" ")[0] + store_id
+        $(`.${className}`).append(temp_html)
+    }
 
-            </div>
-            <button class="add_btn" onclick="storeAddPage()"><b>+</b></button>
-        </div>
-        <div class="empty_map"></div>
-    </div>
+    function hideStoreDetail() {
+        $(`.store_detail`).remove()
+    }
 
-</div>
+    function addLabel(label) {
+        let temp_html = `
+            <span class='tag ${label}' style='${getTagStyle(label)}'>
+                ${label}
+            </span>`
+
+        return temp_html
+    }
+
+    function getTagStyle(label) {
+        let style
+        switch (label) {
+            case 'visa':
+                style = 'background-color: rgb(245,178,38)'
+                break
+            case 'american express':
+                style = 'background-color: rgb(1,111,208)'
+                break
+            case 'master':
+                style = 'background-color: rgb(236,13,27)'
+                break
+            default:
+                style = 'background-color: purple; color: white;'
+        }
+
+        return style
+    }
+
+    let logout = () => {
+        $.removeCookie('token', {path: '/'})
+        window.location.href = '/login'
+    }
+</script>
 </body>
 </html>

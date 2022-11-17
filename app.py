@@ -144,7 +144,7 @@ def api_login():
 @app.route('/api/store/list', methods=['GET'])
 def render_store_list():
     args = request.args
-    district_address = args.get('district_input')
+    district_address = args.get('address_district')
     store_list = list(db.store.find({'store_address_district': district_address}, {'_id': False}))
     if len(store_list) > 0:
         return {'state': 200, 'data': store_list}  # store_list = array containing store object
@@ -192,7 +192,8 @@ def add_store_post():
                 'store_address_district': store_address_district,
                 'store_address_xloc': store_address_xloc,
                 'store_address_yloc': store_address_yloc,
-                'store_label': store_label
+                'store_label': store_label,
+                'store_like': 0,
             })
         if result.inserted_id:
             user_id = int(request.form['user_id'])
