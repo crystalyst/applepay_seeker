@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services,clusterer"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
 
     <title>find applepay store</title>
@@ -120,16 +120,19 @@
 
         .search {
             display: none;
-            border: 1px solid blue;
             background-color: #cccccc;
             max-width: 500px;
             width: 95%;
-            height: 600px;
+            height: 98vh;
             position: absolute;
             top: 50%;
             left: 50%;
             margin-top: -300px;
             margin-left: -250px;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
         }
 
         .modal_title {
@@ -146,13 +149,16 @@
 
         .store_search_input {
             max-width: 400px;
-            width: 90%;
+            width: 85%;
         }
 
         .map {
             width: 100%;
             height: 300px;
-            border: 1px solid red;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
         }
 
         .search_result {
@@ -170,7 +176,7 @@
 
         tbody {
             display: block;
-            height: 120px;
+            height: 80px;
             overflow-y: scroll;
         }
 
@@ -183,7 +189,7 @@
             border: 1px solid black;
         }
 
-        .add_btn {
+        .btn_wrapper {
             margin-top: 20px;
         }
     </style>
@@ -191,15 +197,16 @@
     <script>
         let user_id = 0
         let user_nickname = '사용자'
-        let user_address_district = ''
-        let user_address_xloc = 0
-        let user_address_yloc = 0
+        let store_id = 0
+        let store_xloc = 0
+        let store_yloc = 0
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             getUser()
+            getStore()
         })
 
-        function getUser() {
+         function getUser() {
             $.ajax({
                 type: 'GET',
                 url: '/api/user',
@@ -215,8 +222,6 @@
                     user_id = data['user_id']
                     user_nickname = data['user_nickname']
                     setUser(user_id, user_nickname)
-                    user_address_district = data['user_address_district']
-                    getUserDistrictXYLoc(user_address_district)
                 }
             })
         }
@@ -226,17 +231,57 @@
             $('.user').append(temp_html)
         }
 
-        function getUserDistrictXYLoc(searchWord) {
-            let places = new kakao.maps.services.Places();
-
-            let callback = function(result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-                    user_address_xloc = result[0].x
-                    user_address_yloc = result[0].y
+        function getStore() {
+            let searchParams = new URLSearchParams(location.search)
+            for(const param of searchParams) {
+                if(param[0] == 'store-id') {
+                    store_id = param[1]
                 }
-            };
+            }
 
-            places.keywordSearch(searchWord, callback);
+            $.ajax({
+               type: "GET",
+                url: "/api/store",
+                data: {
+                    'store_id': store_id
+                },
+                success: function(response) {
+                    if(response['state'] != 200) {
+                        alert(response['msg'])
+                        window.location.href = '/'
+                        return
+                    }
+
+                    const data = response['data']
+                    store_id = data['store_id']
+                    store_xloc = data['store_address_xloc']
+                    store_yloc = data['store_address_yloc']
+                    $('#storeName').attr('placeholder', data['store_name'])
+                    $('#storeAddress').attr('placeholder', data['store_address_full'])
+                    setLabel(data['store_label'])
+                }
+            })
+        }
+
+        function setLabel(labels) {
+            for(label of labels) {
+                let temp_html = `<span
+                                class='tag ${label}'
+                                style='${getTagStyle(label)}'
+                             >${label}
+                                <button
+                                    onclick='removeLabel("${label}")'
+                                    type="button"
+                                    class="btn-close"
+                                    aria-label="Close"
+                                >
+                                </button>
+                            </span>`
+
+                $('.tags').append(temp_html)
+                $('#selectLabel').val(label).prop("selected",true)
+                $('option:selected').remove()
+            }
         }
 
         function addLabel() {
@@ -254,6 +299,7 @@
                                 >
                                 </button>
                             </span>`
+
             $('.tags').append(temp_html)
             $('option:selected').remove()
         }
@@ -296,23 +342,28 @@
             $('.search').show()
             let container = $('.map')[0]
             let options = {
-                center: new kakao.maps.LatLng(user_address_yloc, user_address_xloc),
-                level: 7
+                center: new kakao.maps.LatLng(store_yloc, store_xloc),
+                level: 3
             }
             map = new kakao.maps.Map(container, options)
 
-            let markerPosition  = new kakao.maps.LatLng(user_address_yloc, user_address_xloc);
+            // 마커 만들기
+            let markerPosition  = new kakao.maps.LatLng(store_yloc, store_xloc);
             let marker = new kakao.maps.Marker({
                 position: markerPosition
             });
 
+            // 인포윈도우 만들기
+            let storeName = $('#storeName').attr('placeholder')
+            let storeAddress = $('#storeAddress').attr('placeholder')
+            createInfoWindow(marker, storeName, storeAddress)
+
             marker.setMap(map);
         }
 
-        let store_info = {}
+        let store_info = null
         function searchAddress() {
             let places = new kakao.maps.services.Places();
-
             let callback = function(result, status) {
                 if (status === kakao.maps.services.Status.OK) {
                     $('.address_list').children().remove()
@@ -323,6 +374,7 @@
                             latlng: new kakao.maps.LatLng(result[i].y, result[i].x)
                         }
                         markers.push(marker_data)
+
                         let data = JSON.stringify(result[i])
                         let temp_html = `<tr onclick='selectAddress(${data})'>
                             <td>${result[i].address_name}</td>
@@ -342,7 +394,6 @@
         }
 
         function resetMapImage(markers) {
-            console.log("resetmapImage")
             // 지도를 재설정할 범위정보를 가지고 있을 LatLngBounds 객체를 생성합니다
             const bounds = new kakao.maps.LatLngBounds();
 
@@ -367,10 +418,29 @@
             marker.setMap(map);
         }
 
+        function createInfoWindow(marker, storeName, storeAddress) {
+            let iwContent = `<p style="padding: 3px; margin: 0; font-size: 8px;">${storeName}</p><p style="padding: 0 5px; font-size: 8px;">${storeAddress}</p>`,
+            iwPosition = new kakao.maps.LatLng(store_yloc, store_xloc),
+            iwRemoveable = true;
+
+            let infowindow = new kakao.maps.InfoWindow({
+                map: map,
+                position : iwPosition,
+                content : iwContent,
+                clickable: true,
+                removable : iwRemoveable
+            })
+
+            infowindow.open(map, marker);
+            kakao.maps.event.addListener(marker, 'click', function() {
+              infowindow.open(map, marker);
+            });
+        }
+
         function hideSearch() {
+            $('.search').hide()
             $('.store_search_input').val('')
             $('.address_list').children().remove()
-            $('.search').hide()
             map = {}
         }
 
@@ -382,24 +452,43 @@
             hideSearch()
         }
 
-        function addStorePost() {
+        function updateStorePost() {
             let labels = []
             let tags = $('.tag')
             for (let i = 0; i < tags.length; i++) {
                 labels.push(tags[i].innerText.trim())
             }
 
+            if(store_id == 0) {
+               alert("잘못된 가맹점 정보입니다.")
+               window.location.href = '/user'
+               return
+            }
+
+            if (store_info == null) {
+                alert("가맹점 정보를 수정하지 않았습니다.")
+                return
+            }
+
+            let store_address_city = store_info.address_name.split(' ')[0]
+            let store_address_district = store_info.address_name.split(' ')[1]
+            if(!store_address_city.includes('서울')) {
+                alert("서울 외 지역은 현재 서비스 준비 중입니다.")
+                return
+            }
+
             let store_data = {
+                store_id: store_id,
                 store_name: store_info.place_name,
                 store_address_full: store_info.address_name,
-                store_address_district: "서울시 송파구",
+                store_address_district: store_address_district,
                 store_address_xloc: store_info.x,
                 store_address_yloc: store_info.y,
                 store_label: labels,
             }
 
             $.ajax({
-                type: "POST",
+                type: "PUT",
                 url: "/api/store/post",
                 data: store_data,
                 success: function(response) {
@@ -407,6 +496,28 @@
                     window.location.reload()
                 }
             })
+        }
+
+        function deleteStorePost() {
+            if(store_id == 0) {
+              alert("잘못된 가맹점 정보입니다.")
+              window.location.href = '/user'
+              return
+            }
+
+            if (confirm("가맹점 정보를 삭제하시겠습니까?")) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/api/store/post",
+                    data: {
+                        store_id: store_id
+                    },
+                    success: function(response) {
+                        alert(response['msg'])
+                        window.location.href = '/user'
+                    }
+                })
+            }
         }
     </script>
 </head>
@@ -424,7 +535,7 @@
         </div>
     </div>
     <div class="content">
-        <h5 class="sub_title"><span class="icon">🚩</span>가맹점 추가하기</h5>
+        <h5 class="sub_title"><span class="icon">🚩</span>가맹점 수정하기</h5>
         <div class="left_content">
             <div class="input-group mb-3">
                 <input disabled type="text" id="storeName" class="form-control" placeholder="가맹점을 검색해 주세요"
@@ -479,7 +590,10 @@
                 </table>
             </div>
         </div>
-        <button class="add_btn" onclick="addStorePost()">게시하기</button>
+        <div class="btn_wrapper">
+            <button class="update_btn" onclick="updateStorePost()">수정하기</button>
+            <button class="delete_btn" onclick="deleteStorePost()">삭제하기</button>
+        </div>
     </div>
 </div>
 </body>

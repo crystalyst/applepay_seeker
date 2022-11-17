@@ -35,7 +35,7 @@ def home():
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 @app.route('/login')
-def login():
+def render_login_page():
     return render_template('login.html')
 
 @app.route('/user')
@@ -43,11 +43,11 @@ def render_user_page():
     return render_template('user.html')
 
 @app.route('/store/add')
-def store_add():
+def render_store_add_page():
     return render_template('store_add.html')
 
 @app.route('/store/update')
-def store_update():
+def render_store_update_page():
     return render_template('store_update.html')
 
 @app.route('/api/register', methods=['POST'])
@@ -128,8 +128,7 @@ def get_store_post():
     else :
         return jsonify({'state': 404, 'msg': '해당하는 가맹점 정보를 찾을 수 없습니다.'})
 
-@app.route("/store/post", methods=["POST"])
-
+@app.route("/api/store/post", methods=["POST"])
 def add_store_post():
     store_name = request.form['store_name']
     store_address_full = request.form['store_address_full']
@@ -197,27 +196,11 @@ def delete_store_post():
 
     return jsonify({'msg': '가맹점 정보를 찾을 수 없습니다.'})
 
-# @app.route('/test', methods=['GET'])
-# def map_test():
-#     return render_template('index.html')
-
 @app.route('/api/store/map', methods=['POST'])
 def map_by_district():
     print(request.form)
     district_receive = request.form.get('address_district_give')
     return jsonify({'district':district_receive})
-
-@app.route("/store", methods=['GET'])
-def render_store_detail():
-    args = request.args
-    store_id = int(args.get('store_id')) # insomnia sets the value to str by default
-    store_info = db.jason_dummy_stores.find_one({'store_id':store_id},{'_id':False})
-
-    #convert store_address_xloc and yloc to float
-    store_info['store_address_xloc'] = float(store_info['store_address_xloc'])
-    store_info['store_address_yloc'] = float(store_info['store_address_yloc'])
-
-    return jsonify(store_info)
 
 @app.route('/api/user', methods=['GET'])
 def render_user_data_by_id():
@@ -227,7 +210,6 @@ def render_user_data_by_id():
         user_doc = db.user.find_one({ 'user_id': user_id }, {'_id': False})
         print(user_doc)
         return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
-
     except TypeError:
         return {'state': 400, 'msg': 'No user_id key provided'}
     except ValueError:
@@ -235,3 +217,4 @@ def render_user_data_by_id():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
+
