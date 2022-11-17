@@ -6,8 +6,8 @@ app = Flask(__name__)
 from pymongo import MongoClient
 
 cert = certifi.where()
-client = MongoClient('Replace This With your Atlas Endpoint',tlsCAFile=cert)
-db = client.dbsparta  # Replace with your collection name
+client = MongoClient('mongodb+srv://yjsohn:sparta@cluster0.v3x09yn.mongodb.net/?retryWrites=true&w=majority', tlsCAFile=cert)
+db = client.dbapplepay_test # Replace with your collection name
 
 import jwt
 import datetime
@@ -145,7 +145,7 @@ def api_login():
 @app.route('/api/store/list', methods=['GET'])
 def render_store_list():
     args = request.args
-    district_address = args.get('district_input')
+    district_address = args.get('address_district')
     store_list = list(db.store.find({'store_address_district': district_address}, {'_id': False}))
     if len(store_list) > 0:
         return {'state': 200, 'data': store_list}  # store_list = array containing store object
@@ -189,7 +189,8 @@ def add_store_post():
                 'store_address_district': store_address_district,
                 'store_address_xloc': store_address_xloc,
                 'store_address_yloc': store_address_yloc,
-                'store_label': store_label
+                'store_label': store_label,
+                'store_like': 0,
             })
         if result.inserted_id:
             return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 완료되었습니다.'})
