@@ -1,5 +1,8 @@
+from base64 import b64decode
+
 import certifi
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+
 app = Flask(__name__)
 
 from pymongo import MongoClient
@@ -25,15 +28,19 @@ def home():
         return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 @app.route('/login')
-def login():
+def render_login_page():
     return render_template('login.html')
 
+@app.route('/user')
+def render_user_page():
+    return render_template('user.html')
+
 @app.route('/store/add')
-def store_add():
+def render_store_add_page():
     return render_template('store_add.html')
 
 @app.route('/store/update')
-def store_update():
+def render_store_update_page():
     return render_template('store_update.html')
 
 @app.route('/api/register', methods=['POST'])
@@ -118,12 +125,17 @@ def add_store_post():
     store_address_district = request.form['store_address_district']
     store_address_xloc = request.form['store_address_xloc']
     store_address_yloc = request.form['store_address_yloc']
-    store_label = request.form.getlist('store_label[]')
+    store_label = request.form.getlist(['store_label[]'])
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        store_list = db.store.find({}, {'_id': False})
-        store_id = len(list(store_list)) + 1
-        db.store.insert_one(
+        store_list = db.store.find({}, {'store_id': True, '_id': False})
+        if store_list:
+            store_id_sorted = sorted(list(store_list), key=lambda store: store['store_id'])
+            store_id = store_id_sorted[-1]['store_id']+1
+        else:
+            store_id = 1
+
+        result = db.store.insert_one(
             {
                 'store_id': store_id,
                 'store_name': store_name,
@@ -133,8 +145,10 @@ def add_store_post():
                 'store_address_yloc': store_address_yloc,
                 'store_label': store_label
             })
+        if result.inserted_count > 0:
+            return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 완료되었습니다.'})
 
-    return jsonify({'msg': '가맹점 등록이 완료되었습니다.'})
+    return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 실패했습니다.'})
 
 @app.route("/api/store/post", methods=["PUT"])
 def update_store_post():
@@ -172,6 +186,25 @@ def delete_store_post():
 
     return jsonify({'msg': '가맹점 정보를 찾을 수 없습니다.'})
 
+@app.route('/api/store/map', methods=['POST'])
+def map_by_district():
+    print(request.form)
+    district_receive = request.form.get('address_district_give')
+    return jsonify({'district':district_receive})
+
+@app.route('/api/user', methods=['GET'])
+def render_user_data_by_id():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id'))
+        user_doc = db.user.find_one({ 'user_id': user_id }, {'_id': False})
+        print(user_doc)
+        return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
+    except TypeError:
+        return {'state': 400, 'msg': 'No user_id key provided'}
+    except ValueError:
+        return {'state': 400, 'msg': 'Invalid Input or No Such User'}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
+
