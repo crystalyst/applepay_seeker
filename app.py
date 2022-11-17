@@ -6,10 +6,8 @@ app = Flask(__name__)
 
 from pymongo import MongoClient
 cert = certifi.where()
-# client = MongoClient('Replace This With your Atlas Endpoint', tlsCAFile=cert)
-# db = client.dbsparta # Replace with your collection name
-client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority')
-db = client.dbsparta
+client = MongoClient('Replace This With your Atlas Endpoint', tlsCAFile=cert)
+db = client.dbsparta # Replace with your collection name
 
 import jwt
 import datetime
@@ -190,22 +188,9 @@ def delete_store_post():
 
     return jsonify({'msg': '가맹점 정보를 찾을 수 없습니다.'})
 
-"""
-Branch 5 map rendering
-"""
-#
-# @app.route('/api/store/list', methods=['GET'])
-# def render_store_list():
-#     args = request.args
-#     district_address = args.get('district_input')
-#     store_list = list(db.jason_dummy_stores.find({ 'store_address_district': district_address }, {'_id':False}))
-#     if len(store_list) > 0:
-#         return {'state': 200, 'msg': 'Successfully Fetched the data', 'data': store_list} # store_list = array containing store object
-#     return {'state': 404, 'msg': 'Data Not Found by Provided Key'} # empty array
-
-@app.route('/test', methods=['GET'])
-def map_test():
-    return render_template('index.html')
+# @app.route('/test', methods=['GET'])
+# def map_test():
+#     return render_template('index.html')
 
 @app.route('/api/store/map', methods=['POST'])
 def map_by_district():
@@ -225,40 +210,19 @@ def render_store_detail():
 
     return jsonify(store_info)
 
+@app.route('/api/user', methods=['GET'])
+def render_user_data_by_id():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id'))
+        user_doc = db.user.find_one({ 'user_id': user_id }, {'_id': False})
+        print(user_doc)
+        return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
+
+    except TypeError:
+        return {'state': 400, 'msg': 'No user_id key provided'}
+    except ValueError:
+        return {'state': 400, 'msg': 'Invalid Input or No Such User'}
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
-
-"""
-Divider
-
-"""
-#
-#
-# from flask import Flask, render_template, request, jsonify
-# app = Flask(__name__)
-#
-# from pymongo import MongoClient
-# client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority')
-# db = client.dbsparta
-#
-# @app.route('/api/store/list', methods=['GET'])
-# def render_store_list():
-#     args = request.args
-#     district_address = args.get('district_input')
-#     store_list = list(db.jason_dummy_stores.find({ 'store_address_district': district_address }, {'_id':False}))
-#     if len(store_list) > 0:
-#         return {'state': 200, 'msg': 'Successfully Fetched the data', 'data': store_list} # store_list = array containing store object
-#     return {'state': 404, 'msg': 'Data Not Found by Provided Key'} # empty array
-#
-# @app.route('/test', methods=['GET'])
-# def map_test():
-#     return render_template('mainpage.html')
-#
-# @app.route('/api/store/map', methods=['POST'])
-# def map_by_district():
-#     print(request.form)
-#     district_receive = request.form.get('address_district_give')
-#     return jsonify({'district':district_receive})
-#
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=8000,debug=True)

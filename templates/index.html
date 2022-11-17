@@ -283,21 +283,17 @@
         get_district(init_district);
     });
 
-    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+    var mapContainer = document.getElementById('map'),
         mapOption = {
-            center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-            level: 3 // 지도의 확대 레벨
+            center: new kakao.maps.LatLng(33.450701, 126.570667),
+            level: 3
         };
 
-    // 지도를 생성합니다
     var map = new kakao.maps.Map(mapContainer, mapOption);
-
-    // 주소-좌표 변환 객체를 생성합니다
     var geocoder = new kakao.maps.services.Geocoder();
 
     let changeDistrict = () => {
         dist = $('#selectDistrict option:selected').val();
-        console.log(dist)
         return dist
     }
 
@@ -314,7 +310,6 @@
             success: function (response) {
                 $('#store_queue').empty();
                 target_district_store_list = response['data']
-                console.log(response)
                 if (typeof target_district_store_list == "undefined") {
                     $.ajax({
                         type: "POST",
@@ -324,24 +319,21 @@
                             target_district = response['district']
                             // Drawing Map
                             geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
-                                // 정상적으로 검색이 완료됐으면
                                 if (status === kakao.maps.services.Status.OK) {
-
                                     var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                                    // 결과값으로 받은 위치를 마커로 표시합니다
+                                    // Marker
                                     var marker = new kakao.maps.Marker({
                                         map: map,
                                         position: coords
                                     });
 
-                                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                    // Info Window
                                     var infowindow = new kakao.maps.InfoWindow({
                                         content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
                                     });
                                     infowindow.open(map, marker);
 
-                                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                                    // Zeroing map
                                     map.setCenter(coords);
                                 }
                             });
@@ -369,24 +361,22 @@
                             target_district = response['district']
                             // Drawing Map
                             geocoder.addressSearch(`서울 ${target_district}`, function (result, status) {
-                                // 정상적으로 검색이 완료됐으면
                                 if (status === kakao.maps.services.Status.OK) {
-
                                     var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
 
-                                    // 결과값으로 받은 위치를 마커로 표시합니다
+                                    // Marker
                                     var marker = new kakao.maps.Marker({
                                         map: map,
                                         position: coords
                                     });
 
-                                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                    // Info Window
                                     var infowindow = new kakao.maps.InfoWindow({
                                         content: `<div style="width:150px;text-align:center;padding:6px 0;">${target_district}</div>`
                                     });
                                     infowindow.open(map, marker);
 
-                                    // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+                                    // Zeroing map
                                     map.setCenter(coords);
                                 }
                             });
@@ -473,83 +463,19 @@
                     <option value="중랑구">중랑구</option>
                 </select>
                 <button onclick="get_district(changeDistrict())" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
-            <!--
             </div>
-
-
-                      <li><a class="dropdown-item" href="#">마포구</a></li>
-                      <li><a class="dropdown-item" href="#">서대문구</a></li>
-                      <li><a class="dropdown-item" href="#">서초구</a></li>
-                      <li><a class="dropdown-item" href="#">성동구</a></li>
-                      <li><a class="dropdown-item" href="#">성북구</a></li>
-                      <li><a class="dropdown-item" href="#">송파구</a></li>
-                      <li><a class="dropdown-item" href="#">양천구</a></li>
-                      <li><a class="dropdown-item" href="#">영등포구</a></li>
-                      <li><a class="dropdown-item" href="#">용산구</a></li>
-                      <li><a class="dropdown-item" href="#">은평구</a></li>
-                      <li><a class="dropdown-item" href="#">종로구</a></li>
-                      <li><a class="dropdown-item" href="#">중구</a></li>
-                      <li><a class="dropdown-item" href="#">중랑구</a></li>
-                    </ul>
-                </div>
-                <button onclick='showSearch()' class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
-            -->
-            </div>
-            <!--<div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">주소</span>
-                <input disabled type="text" id="storeAddress" class="form-control" placeholder="주소는 자동 입력 됩니다" aria-label="Username"
-                       aria-describedby="basic-addon1">
-                <button onclick="get_district(changeDistrict())" class="btn btn-outline-secondary" type="button" id="button-addon2">찾기</button>
-            </div>
-            -->
             <div class="input-group mb-3">
                 <div id="store_queue">
                     <button>송파구 : Burger King</button>
                     <button>송파구 : 롯데리아</button>
                 </div>
             </div>
-            <!--
-            <div class="input-group mb-3">
-                <label class="input-group-text" for="selectLabel">특이사항</label>
-                <select class="form-select" id="selectLabel" onchange="addLabel()">
-                    <option selected>특이사항을 선택해주세요</option>
-                    <option value="visa">visa only</option>
-                    <option value="american express">amex only</option>
-                    <option value="master">master only</option>
-                    <option value="kiosk">kiosk only</option>
-                </select>
-            </div>
-            -->
+
             <div class="tags"></div>
         </div>
         <div class="right_content">
 
         </div>
-        <!--
-        <div class="add_post_modal">
-            <div class="modal_header">
-                <span class="icon">🔑</span>
-                <div class="modal_title">로그인</div>
-            </div>
-            <div class="close_btn">
-                <button onclick="hideAddPost()" type="button" class="btn-close" aria-label="Close"></button>
-            </div>
-            <div class="modal_content">
-                <div>
-                    <p>아이디</p>
-                    <input onkeydown="validateLoginEmail()" onkeyup="validateLogin()" class="login_email_input" type="text" placeholder="이메일을 입력해주세요."/>
-                    <p class="validate_msg login email">올바르지 않은 이메일 형식입니다.</p>
-                </div>
-                <div>
-                    <p>비밀번호</p>
-                    <input onkeydown="validateLoginPassword()" onkeyup="validateLogin()" class="login_password_input" type="password" placeholder="비밀번호를 입력해주세요."/>
-                    <p class="validate_msg login pw">비밀번호는 한글, 영문, 숫자 혼합 8자 이상 입니다.</p>
-                </div>
-                <button disabled class="login_btn" onclick="login()">로그인</button>
-            </div>
-
-        </div>
-        -->
             <button class="add_btn" onclick="storeAddPage()"><b>+</b></button>
     </div>
         <div class="empty_map"></div>

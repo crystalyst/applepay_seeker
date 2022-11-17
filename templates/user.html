@@ -208,6 +208,7 @@
 
         function setUserID() {
             let searchParams = new URLSearchParams(location.search)
+            console.log(searchParams)
             for(const param of searchParams) {
                 if(param[0] == 'user-id') {
                     user_id = param[1]
@@ -223,14 +224,16 @@
                     user_id: user_id
                 },
                 success: function(response) {
+                    console.log(response)
                     if(response['state'] > 200) {
                         alert(response['msg'])
-                        window.location.href = '/'
+                        // window.location.href = '/'
                         return
                     }
 
                     const data = response['data']
-                    setUserInfo(data['user_nickname'], data['user_email'], data['user_address_district'])
+                    console.log(data)
+                    setUserInfo(data['user_name'], data['user_email'], data['user_address_district'])
                 }
             })
         }
@@ -251,7 +254,7 @@
                 success: function(response) {
                     if(response['state'] > 200) {
                         alert(response['msg'])
-                        window.location.href = '/'
+                        // window.location.href = '/'
                         return
                     }
 
