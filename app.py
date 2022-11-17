@@ -1,13 +1,12 @@
 import certifi
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from pymongo import MongoClient
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-from pymongo import MongoClient
-
 cert = certifi.where()
-client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority')
-db = client.dbsparta
+client = MongoClient('Replace with your Atlas Endpoint', tlsCAFile=cert)
+db = client.dbsparta # Replace with your collection name
 
 import jwt
 import datetime
@@ -157,7 +156,7 @@ def api_login():
 @app.route('/api/store/list', methods=['GET'])
 def render_store_list():
     args = request.args
-    district_address = args.get('district_input')
+    district_address = args.get('address_district')
     store_list = list(db.store.find({'store_address_district': district_address}, {'_id': False}))
     if len(store_list) > 0:
         return {'state': 200, 'data': store_list}  # store_list = array containing store object
@@ -322,14 +321,37 @@ def render_store_list_per_user():
         store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
         for store in store_list_per_user:
             del store['_id']
-        print(store_list_per_user)
-
-        return {'state': 200, 'msg': 'Successfully Fetched the data',
-                'data': store_list_per_user}  # store_list = array containing store object
+        return {'state': 200, 'data': store_list_per_user}  # store_list = array containing store object
     except TypeError: # exception handling just in case args.get('user_id') takes non-string value
-        return {'state': 400, 'msg': 'Bad Request - Invalid Input from client'}
+        return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
     except ValueError: # exception handling just in case args.get('user_id') takes empty string
-        return {'state': 400, 'msg': 'Bad Request - No Such User Exists'}
+        return {'state': 400, 'msg': '없는 사용자 정보 입니다.'}
+
+@app.route('/api/user', methods=['GET'])
+def render_user_data_by_id():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id'))
+        user_doc = db.jason_dummy_users.find_one({ 'user_id': user_id }, {'_id': False})
+        return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
+    except TypeError:
+        return {'state': 400, 'msg': 'No user_id key provided'}
+    except ValueError:
+        return {'state': 400, 'msg': 'Invalid Input or No Such User'}
+
+@app.route('/api/user/store/list', methods=['GET'])
+def render_store_list_per_user():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id')) # avoid KeyError
+        # Your collection name -> change it to applicable collection name!
+        user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+        store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+        return {'state': 200, 'data': store_list_per_user}  # store_list = array containing store object
+    except TypeError: # exception handling just in case args.get('user_id') takes non-string value
+        return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
+    except ValueError: # exception handling just in case args.get('user_id') takes empty string
+        return {'state': 400, 'msg': '없는 사용자 정보 입니다.'}
 
 @app.route('/store/comment', methods=['POST'])
 def add_comment():
