@@ -243,6 +243,7 @@
     <script>
         let userLogout = () => {
             $.removeCookie('token', {path: '/'});
+            alert('로그아웃이 완료되었습니다.')
             window.location.href = '/login'
         }
 
@@ -419,11 +420,12 @@
             let dump_store_detail = (unique_store_id) => {
                 $.ajax({
                     type: "GET",
-                    url: "/store",
+                    url: "/api/store",
                     data: {'store_id': unique_store_id},
                     success: function (response) {
                         target_store_address_full = response['store_address_full'];
                         target_store_address_label = response['store_label'];
+                        console.log(target_store_address_label, target_store_address_full)
                     }
                 });
 
