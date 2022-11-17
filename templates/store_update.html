@@ -12,8 +12,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e96a842d4cb9bee7729780f46fd1461e&libraries=services,clusterer"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=684aab9ad05e8c902c00e704db5509ab&libraries=services"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
     <title>find applepay store</title>
     <style>
@@ -195,9 +197,11 @@
     </style>
 
     <script>
-        let user_id = 0
-        let user_nickname = '사용자'
-        let store_id = 0
+        let str_user_id = `{{ user_id }}`;
+        let user_id = parseInt(str_user_id);
+        let user_nickname = `{{ user_name }}`;
+        let str_store_id = `{{ store_id }}`;
+        let store_id = parseInt(str_store_id);
         let store_xloc = 0
         let store_yloc = 0
 
@@ -210,17 +214,21 @@
             $.ajax({
                 type: 'GET',
                 url: '/api/user',
-                data: {},
+                data: {
+                    user_id: user_id
+                    },
                 success: function(response) {
                     if(response['state'] > 200) {
-                        alert('사용자 정보를 가져오는데 실패했습니다.')
-                        window.location.href = '/'
+                         alert('사용자 정보를 가져오는데 실패했습니다.')
+                        //window.location.href = '/'
                         return
                     }
 
                     const data = response['data']
+                    console.log(data)
                     user_id = data['user_id']
-                    user_nickname = data['user_nickname']
+                    console.log(user_id)
+                    console.log(user_nickname)
                     setUser(user_id, user_nickname)
                 }
             })
@@ -248,7 +256,7 @@
                 success: function(response) {
                     if(response['state'] != 200) {
                         alert(response['msg'])
-                        window.location.href = '/'
+                        // window.location.href = '/'
                         return
                     }
 
@@ -478,6 +486,7 @@
             }
 
             let store_data = {
+                user_id: user_id,
                 store_id: store_id,
                 store_name: store_info.place_name,
                 store_address_full: store_info.address_name,
@@ -510,7 +519,8 @@
                     type: "DELETE",
                     url: "/api/store/post",
                     data: {
-                        store_id: store_id
+                        store_id: store_id,
+                        user_id: user_id
                     },
                     success: function(response) {
                         alert(response['msg'])
