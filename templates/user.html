@@ -230,7 +230,9 @@
                         return
                     }
                     if (response['data'] !== null) {
+                        console.log(response['data'])
                         const storeList = response['data']
+
                         for(let i = 0; i < storeList.length; i++) {
                             setUserStorePost(storeList[i])
                         }

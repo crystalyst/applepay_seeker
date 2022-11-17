@@ -185,21 +185,22 @@ def add_store_post():
             store_id = 1
             store_id_recorder = store_id
 
-        result = db.store.insert_one(
-            {
+        store_info = {
                 'store_id': store_id,
                 'store_name': store_name,
                 'store_address_full': store_address_full,
                 'store_address_district': store_address_district,
                 'store_address_xloc': store_address_xloc,
                 'store_address_yloc': store_address_yloc,
-                'store_label': store_label
-            })
+                'store_label': store_label,
+                'store_like': 0,
+        }
+        result = db.store.insert_one(store_info)
         if result.inserted_id:
             user_id = int(request.form['user_id'])
             user_doc = db.user.find_one({'user_id': user_id}, {'_id':False})
             user_post = user_doc['user_post']
-            user_post.append(store_id_recorder)
+            user_post.append(store_info)
             db.user.update_one({'user_id': user_id}, {'$set': {
                 'user_post': user_post,
             }})
@@ -274,6 +275,9 @@ def render_store_list_per_user():
         # Your collection name -> change it to applicable collection name!
         user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
         store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+        for store in store_list_per_user:
+            del store['_id']
+        print(store_list_per_user)
 
         return {'state': 200, 'msg': 'Successfully Fetched the data',
                 'data': store_list_per_user}  # store_list = array containing store object
