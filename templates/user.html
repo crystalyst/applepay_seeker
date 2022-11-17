@@ -199,7 +199,8 @@
     </style>
 
     <script>
-        let user_id = 0
+        let str_user_id = `{{ user_id }}`;
+        let user_id = parseInt(str_user_id);
 
         $(document).ready(function () {
             setUserID()

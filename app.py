@@ -6,8 +6,8 @@ app = Flask(__name__)
 from pymongo import MongoClient
 
 cert = certifi.where()
-client = MongoClient('Replace This With your Atlas Endpoint',tlsCAFile=cert)
-db = client.dbsparta  # Replace with your collection name
+client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority')
+db = client.dbsparta
 
 import jwt
 import datetime
