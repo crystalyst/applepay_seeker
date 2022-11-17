@@ -230,7 +230,9 @@
                         return
                     }
                     if (response['data'] !== null) {
+                        console.log(response['data'])
                         const storeList = response['data']
+
                         for(let i = 0; i < storeList.length; i++) {
                             setUserStorePost(storeList[i])
                         }
@@ -241,6 +243,7 @@
         }
 
         function setUserStorePost(store) {
+            $('#store_placeholder').empty();
             let temp_html = `
                 <tr>
                     <td>${store['store_address_full']}</td>
@@ -295,7 +298,7 @@
                     </tr>
                 </thead>
                 <tbody class="post_list">
-                    <tr>
+                    <tr id="store_placeholder">
                         <td style="width: 470px; height: 360px; line-height: 360px; text-align: center">등록한 가맹점이 없습니다.</td>
                     </tr>
                 </tbody>

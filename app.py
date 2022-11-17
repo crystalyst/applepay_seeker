@@ -69,7 +69,19 @@ def render_store_add_page():
 
 @app.route('/store/update')
 def render_store_update_page():
-    return render_template('store_update.html')
+    store_id = request.args.get('store_id')
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.user.find_one({"user_email": payload['email']})
+        if user_info:
+            return render_template('store_update.html', user_id=user_info["user_id"], user_name=user_info["user_name"],
+                                   user_address_district=user_info["user_address_district"], store_id=store_id)
+        return redirect(url_for("render_login_page", msg="존재하지 않는 사용자입니다."))
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("render_login_page", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("render_login_page", msg="로그인 정보가 존재하지 않습니다."))
 
 
 @app.route('/api/register', methods=['POST'])
@@ -174,18 +186,14 @@ def add_store_post():
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
         store_list = list(db.store.find({}, {'store_id': True, '_id': False}))
-        store_id_recorder = 0
         if len(store_list) > 0:
             store_id_sorted = sorted(store_list, key=lambda store: store['store_id'])
             print(store_id_sorted, len(store_id_sorted))
             store_id = store_id_sorted[-1]['store_id'] + 1
-            store_id_recorder = store_id
         else:
             store_id = 1
-            store_id_recorder = store_id
 
-        result = db.store.insert_one(
-            {
+        store_info = {
                 'store_id': store_id,
                 'store_name': store_name,
                 'store_address_full': store_address_full,
@@ -194,12 +202,15 @@ def add_store_post():
                 'store_address_yloc': store_address_yloc,
                 'store_label': store_label,
                 'store_like': 0,
-            })
+                'store_comment': 0,
+        }
+        result = db.store.insert_one(store_info)
         if result.inserted_id:
+            # add store object to user at user_post field
             user_id = int(request.form['user_id'])
             user_doc = db.user.find_one({'user_id': user_id}, {'_id':False})
             user_post = user_doc['user_post']
-            user_post.append(store_id_recorder)
+            user_post.append(store_info)
             db.user.update_one({'user_id': user_id}, {'$set': {
                 'user_post': user_post,
             }})
@@ -211,7 +222,7 @@ def add_store_post():
 
 @app.route("/api/store/post", methods=["PUT"])
 def update_store_post():
-    store_id = request.form['store_id']
+    store_id = int(request.form['store_id'])
     store_name = request.form['store_name']
     store_address_full = request.form['store_address_full']
     store_address_district = request.form['store_address_district']
@@ -219,17 +230,37 @@ def update_store_post():
     store_address_yloc = request.form['store_address_yloc']
     store_label = request.form.getlist('store_label[]')
 
+    store_updated_info = {
+        'store_id': store_id,
+        'store_name': store_name,
+        'store_address_full': store_address_full,
+        'store_address_district': store_address_district,
+        'store_address_xloc': store_address_xloc,
+        'store_address_yloc': store_address_yloc,
+        'store_label': store_label,
+        'store_like': 0,
+        'store_comment': 0,
+    }
+
     if None not in (
             store_id, store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        result = db.store.update_one({'store_id': int(store_id)}, {'$set': {
-            'store_name': store_name,
-            'store_address_full': store_address_full,
-            'store_address_district': store_address_district,
-            'store_address_xloc': store_address_xloc,
-            'store_address_yloc': store_address_yloc,
-            'store_label': store_label
-        }})
+        result = db.store.update_one({'store_id': int(store_id)}, {'$set': store_updated_info})
         if result.modified_count > 0:
+            # add store object to user at user_post field
+            user_id = int(request.form['user_id'])
+            user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+            user_post = user_doc['user_post']
+            target_post = store_updated_info
+            temp = 0
+            for post in user_post:
+                # del post['_id']
+                if post['store_id'] == store_id:
+                    temp = user_post.index(post)
+                    break
+            user_post[temp] = target_post
+            db.user.update_one({'user_id': user_id}, {'$set': {
+                'user_post': user_post,
+            }})
             return jsonify({'status': 200, 'msg': '가맹점 정보 수정이 완료되었습니다.'})
 
         return jsonify({'status': 500, 'msg': '가맹점 정보 수정이 실패했습니다.'})
@@ -241,6 +272,16 @@ def delete_store_post():
     if store_id:
         result = db.store.delete_one({'store_id': int(store_id)})
         if result.deleted_count > 0:
+            user_id = int(request.form['user_id'])
+            user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+            user_post = user_doc['user_post']
+            temp = 0
+            for post in user_post:
+                if post['store_id'] == store_id:
+                    temp = user_post.index(post)
+                    break
+            del user_post[temp]
+
             return jsonify({'status': 200, 'msg': '가맹점 정보 삭제가 완료되었습니다.'})
 
         return jsonify({'status': 500, 'msg': '가맹점 정보 삭제가 실패했습니다.'})
@@ -260,6 +301,10 @@ def render_user_data_by_id():
     try:
         user_id = int(args.get('user_id'))
         user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+        store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+        for store in store_list_per_user:
+            del store['_id']
+
         return {'state': 200, 'data': user_doc}
     except TypeError:
         return {'state': 400, 'msg': '잘못된 사용자 ID 타입 입니다.'}
@@ -274,6 +319,8 @@ def render_store_list_per_user():
         # Your collection name -> change it to applicable collection name!
         user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
         store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+        for store in store_list_per_user:
+            del store['_id']
         return {'state': 200, 'data': store_list_per_user}  # store_list = array containing store object
     except TypeError: # exception handling just in case args.get('user_id') takes non-string value
         return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
@@ -287,7 +334,6 @@ def render_user_data_by_id():
         user_id = int(args.get('user_id'))
         user_doc = db.jason_dummy_users.find_one({ 'user_id': user_id }, {'_id': False})
         return {'state': 200, 'msg': 'User Data Successfully Fetched!', 'data': user_doc}
-
     except TypeError:
         return {'state': 400, 'msg': 'No user_id key provided'}
     except ValueError:
@@ -306,6 +352,22 @@ def render_store_list_per_user():
         return {'state': 400, 'msg': '잘못된 사용자 정보 입니다.'}
     except ValueError: # exception handling just in case args.get('user_id') takes empty string
         return {'state': 400, 'msg': '없는 사용자 정보 입니다.'}
+
+@app.route('/store/comment', methods=['POST'])
+def add_comment():
+    store_id = int(request.form['store_id'])
+    # user_id will be included in the session/cookie - temp
+    user_id = int(request.form['user_id'])
+    content = request.form['content']
+
+    comment_doc = {
+        'user_id': user_id,
+        'store_id': store_id,
+        'content': content
+    }
+    db.comment.insert_one(comment_doc)
+
+    return {'result': 'success'}
 
 
 if __name__ == '__main__':
