@@ -174,9 +174,10 @@ def add_store_post():
     store_label = request.form.getlist('store_label[]')
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        store_list = db.store.find({}, {'store_id': True, '_id': False})
-        if store_list:
-            store_id_sorted = sorted(list(store_list), key=lambda store: store['store_id'])
+        store_list = list(db.store.find({}, {'store_id': True, '_id': False}))
+        if len(store_list) > 0:
+            store_id_sorted = sorted(store_list, key=lambda store: store['store_id'])
+            print(store_id_sorted, len(store_id_sorted))
             store_id = store_id_sorted[-1]['store_id'] + 1
         else:
             store_id = 1
@@ -253,6 +254,22 @@ def render_user_data_by_id():
         return {'state': 400, 'msg': '잘못된 사용자 ID 타입 입니다.'}
     except ValueError:
         return {'state': 400, 'msg': '잘못된 사용자 정보이거나 없는 사용자 정보 입니다.'}
+
+@app.route('/api/user/store/list', methods=['GET'])
+def render_store_list_per_user():
+    args = request.args
+    try:
+        user_id = int(args.get('user_id')) # avoid KeyError
+        # Your collection name -> change it to applicable collection name!
+        user_doc = db.user.find_one({'user_id': user_id}, {'_id': False})
+        store_list_per_user = user_doc.get('user_post')  # to avoid KeyError if user_post DNE
+
+        return {'state': 200, 'msg': 'Successfully Fetched the data',
+                'data': store_list_per_user}  # store_list = array containing store object
+    except TypeError: # exception handling just in case args.get('user_id') takes non-string value
+        return {'state': 400, 'msg': 'Bad Request - Invalid Input from client'}
+    except ValueError: # exception handling just in case args.get('user_id') takes empty string
+        return {'state': 400, 'msg': 'Bad Request - No Such User Exists'}
 
 
 if __name__ == '__main__':

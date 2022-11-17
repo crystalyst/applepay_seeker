@@ -229,11 +229,13 @@
                         window.location.href = '/'
                         return
                     }
-
-                    const storeList = response['data']
-                    for(let i = 0; i < storeList.length; i++) {
-                        setUserStorePost(storeList[i])
+                    if (response['data'] !== null) {
+                        const storeList = response['data']
+                        for(let i = 0; i < storeList.length; i++) {
+                            setUserStorePost(storeList[i])
+                        }
                     }
+
                 }
             })
         }
