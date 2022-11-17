@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 
     <title>find applepay store</title>
     <style>
@@ -201,7 +203,6 @@
 
         $(document).ready(function () {
             setUserID()
-            getUser()
             getUserStoreList()
         });
 
@@ -214,36 +215,10 @@
             }
         }
 
-        function getUser() {
-            $.ajax({
-                type: "GET",
-                url: "/api/user",
-                data: {
-                    user_id: user_id
-                },
-                success: function(response) {
-                    if(response['state'] > 200) {
-                        alert(response['msg'])
-                        window.location.href = '/'
-                        return
-                    }
-
-                    const data = response['data']
-                    setUserInfo(data['user_name'], data['user_email'], data['user_address_district'])
-                }
-            })
-        }
-
-        function setUserInfo(nickname, email, address_district) {
-            $('.user_nickname').text(nickname + ' 님!')
-            $('.user_email').text(email)
-            $('.user_address_district').text(address_district)
-        }
-
         function getUserStoreList() {
             $.ajax({
                 type: "GET",
-                url: "/api/store/list",
+                url: "/api/user/store/list",
                 data: {
                     user_id: user_id
                 },
@@ -283,6 +258,12 @@
         function routeToStoreAddPage() {
             window.location.href = '/store/add'
         }
+
+        function logout() {
+            $.removeCookie('mytoken')
+            alert('로그아웃이 완료되었습니다.')
+            window.location.href='/login'
+        }
     </script>
 </head>
 <body>
@@ -294,7 +275,7 @@
             <span style="margin-left: 10px;">찾기</span>
         </h3>
         <div class="side_menu">
-            <button class="logout_btn">LOGOUT</button>
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
         </div>
     </div>
     <div class="content">
@@ -320,7 +301,7 @@
         <div class="right_content">
             <div class="user_state">
                 <span class="icon">😎</span>
-                <div class="user_nickname"></div>
+                <div class="user_nickname">{{ user_name }}</div>
                 <div class="welcome_text">오늘도 🍎 사용하러 떠나볼까요?</div>
             </div>
             <div class="user_info">
@@ -329,11 +310,11 @@
                 </div>
                 <div class="info_content">
                     <span>이메일</span>
-                    <span class="user_email"></span>
+                    <span class="user_email">{{ user_email }}</span>
                 </div>
                 <div class="info_content">
                     <span>지역</span>
-                    <span class="user_address_district"></span>
+                    <span class="user_address_district">{{ user_address_district }}</span>
                 </div>
             </div>
         </div>
