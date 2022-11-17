@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="사과찾기"/>
+    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+    <meta property="og:image" content=""/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    <title>find applepay store</title>
+    <style>
+        @font-face {
+            font-family: 'dunggeunmo';
+            font-weight: 400;
+            font-style: normal;
+            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'dunggeunmo';
+        }
+
+        .wrapper {
+            background-color: #cccccc;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid darkgray;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon {
+            display: block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .side_menu {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .side_menu::after {
+            display: block;
+            content: '';
+            clear: both;
+        }
+
+        .logout_btn {
+            float: right;
+            height: 30px;
+        }
+
+        .sub_title {
+            line-height: 30px;
+            margin-bottom: 20px;
+        }
+
+        .sub_title > .icon {
+            margin-right: 10px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .content::after {
+            display: block;
+            content: '';
+            clear: both;
+        }
+
+        .left_content {
+            float: left;
+            width: 50%;
+            margin-right: 5%;
+        }
+
+        .right_content {
+            float: right;
+            width: 45%;
+            padding: 20px;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .user_state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user_nickname {
+            margin-top: 20px;
+        }
+
+        .user_info {
+            padding: 10px;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .content_title {
+            margin-bottom: 20px;
+            border-bottom: 3px solid black;
+        }
+
+        .info_content {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stores {
+            display: block;
+            border: 1px solid black;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        thead {
+            width: 100%;
+            border-bottom: 1px solid black;
+        }
+
+        tbody {
+            display: block;
+            height: 60vh;
+            overflow-y: scroll;
+        }
+
+        td {
+            text-indent: 10px;
+        }
+
+        .stores th:nth-of-type(1), .post_list td:nth-of-type(1) { width: 350px; }
+        .stores th:nth-of-type(2), .post_list td:nth-of-type(2) { width: 200px; }
+        .stores th:nth-of-type(3), .post_list td:nth-of-type(3) { width: 75px; }
+        .stores th:nth-of-type(4), .post_list td:nth-of-type(4) { width: 75px; }
+        .stores th:nth-of-type(5), .post_list td:nth-of-type(5) { width: 100px; }
+
+        tr:hover {
+            cursor: pointer;
+            border: 1px solid black;
+        }
+
+        .add_store_post_btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 20px;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+    </style>
+
+    <script>
+        let str_user_id = `{{ user_id }}`;
+        let user_id = parseInt(str_user_id);
+
+        $(document).ready(function () {
+            setUserID()
+            getUserStoreList()
+        });
+
+        function setUserID() {
+            let searchParams = new URLSearchParams(location.search)
+            for(const param of searchParams) {
+                if(param[0] == 'user-id') {
+                    user_id = param[1]
+                }
+            }
+        }
+
+        function getUserStoreList() {
+            $.ajax({
+                type: "GET",
+                url: "/api/user/store/list",
+                data: {
+                    user_id: user_id
+                },
+                success: function(response) {
+                    if(response['state'] > 200) {
+                        alert(response['msg'])
+                        window.location.href = '/'
+                        return
+                    }
+                    if (response['data'] !== null) {
+                        const storeList = response['data']
+                        for(let i = 0; i < storeList.length; i++) {
+                            setUserStorePost(storeList[i])
+                        }
+                    }
+
+                }
+            })
+        }
+
+        function setUserStorePost(store) {
+            let temp_html = `
+                <tr>
+                    <td>${store['store_address_full']}</td>
+                    <td>${store['store_name']}</td>
+                    <td>🍎 ${store['store_like']}</td>
+                    <td>💬 ${store['store_comment']}</td>
+                    <td><button onclick="routeToStoreUpdatePage(${store['store_id']})">수정하기</button></td>
+                </tr>
+            `
+
+            $('.post_list').append(temp_html)
+        }
+
+        function routeToStoreUpdatePage(storeID) {
+            window.location.href = '/store/update?store_id=' + storeID
+        }
+
+        function routeToStoreAddPage() {
+            window.location.href = '/store/add'
+        }
+
+        function logout() {
+            $.removeCookie('mytoken')
+            alert('로그아웃이 완료되었습니다.')
+            window.location.href='/login'
+        }
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h3 class="title">
+            <span style="margin-right: 10px;">사과</span>
+            <span class="icon">🍎</span>
+            <span style="margin-left: 10px;">찾기</span>
+        </h3>
+        <div class="side_menu">
+            <button class="logout_btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+    <div class="content">
+        <h5 class="sub_title"><span class="icon">🚩</span>내가 등록한 가맹점 목록</h5>
+        <div class="left_content">
+            <table class="stores">
+                <thead>
+                    <tr>
+                        <th>주소</th>
+                        <th>상호명</th>
+                        <th>좋아요</th>
+                        <th>댓글</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody class="post_list">
+                    <tr>
+                        <td style="width: 470px; height: 360px; line-height: 360px; text-align: center">등록한 가맹점이 없습니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="right_content">
+            <div class="user_state">
+                <span class="icon">😎</span>
+                <div class="user_nickname">{{ user_name }}</div>
+                <div class="welcome_text">오늘도 🍎 사용하러 떠나볼까요?</div>
+            </div>
+            <div class="user_info">
+                <div class="content_title">
+                    사용자 정보
+                </div>
+                <div class="info_content">
+                    <span>이메일</span>
+                    <span class="user_email">{{ user_email }}</span>
+                </div>
+                <div class="info_content">
+                    <span>지역</span>
+                    <span class="user_address_district">{{ user_address_district }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button onclick="routeToStoreAddPage()" class="add_store_post_btn">➕</button>
+</div>
+</body>
+</html>
