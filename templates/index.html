@@ -350,15 +350,14 @@
                 }
                 else {
                     for (let i = 0; i < target_district_store_list.length; i++) {
-                        store_id = target_district_store_list[i]['store_id']
-                        store_name = target_district_store_list[i]['store_name']
-                        store_address_full = target_district_store_list[i]['store_address_full']
+                        store_id = target_district_store_list[i]['store_id'];
+                        store_name = target_district_store_list[i]['store_name'];
+                        store_address_full = target_district_store_list[i]['store_address_full'];
 
-                        //temp_html = `<button>${store_name} : ${store_address_full}</button>`
                         temp_html = `<div class="input-group mb-3">
-                                        <input disabled type="text" id="storeAddress" value="${store_name} : ${store_address_full}" class="form-control" aria-label="Username"
+                                        <input disabled type="text" id="storeAddress ${store_id}" value="${store_name} : ${store_address_full}" class="form-control" aria-label="Username"
                                                aria-describedby="basic-addon1">
-                                        <button onclick="" class="btn btn-outline-secondary" type="button" id="button-addon2">가맹점 정보</button>
+                                        <button onclick="dump_store_detail(${store_id})" class="btn btn-outline-secondary" type="button" id="button-addon2 store-${i}">가맹점 정보</button>
                                     </div>`
                         $('#store_queue').append(temp_html);
                     }
@@ -417,6 +416,22 @@
                     $('#store_queue').append(temp_html);
                 }
 
+            }
+        });
+
+    }
+
+    let dump_store_detail = (unique_store_id) => {
+        $.ajax({
+            type: "GET",
+            url: "/store",
+            data: {'store_id': unique_store_id},
+            success: function (response) {
+                target_store_address_full = response['store_address_full'];
+                target_store_address_label = response['store_label'];
+
+                console.log(target_store_address_full)
+                console.log(target_store_address_label)
             }
         });
 
