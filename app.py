@@ -127,19 +127,25 @@ def get_store_post():
     else :
         return jsonify({'state': 404, 'msg': '해당하는 가맹점 정보를 찾을 수 없습니다.'})
 
-@app.route("/api/store/post", methods=["POST"])
+@app.route("/store/post", methods=["POST"])
+
 def add_store_post():
     store_name = request.form['store_name']
     store_address_full = request.form['store_address_full']
     store_address_district = request.form['store_address_district']
     store_address_xloc = request.form['store_address_xloc']
     store_address_yloc = request.form['store_address_yloc']
-    store_label = request.form.getlist('store_label[]')
+    store_label = request.form.getlist(['store_label[]'])
 
     if None not in (store_name, store_address_full, store_address_district, store_address_xloc, store_address_yloc):
-        store_list = db.store.find({}, {'_id': False})
-        store_id = len(list(store_list)) + 1
-        db.store.insert_one(
+        store_list = db.store.find({}, {'store_id': True, '_id': False})
+        if store_list:
+            store_id_sorted = sorted(list(store_list), key=lambda store: store['store_id'])
+            store_id = store_id_sorted[-1]['store_id']+1
+        else:
+            store_id = 1
+
+        result = db.store.insert_one(
             {
                 'store_id': store_id,
                 'store_name': store_name,
@@ -149,8 +155,10 @@ def add_store_post():
                 'store_address_yloc': store_address_yloc,
                 'store_label': store_label
             })
+        if result.inserted_count > 0:
+            return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 완료되었습니다.'})
 
-    return jsonify({'msg': '가맹점 등록이 완료되었습니다.'})
+    return jsonify({'status': 200, 'msg': '가맹점 정보 추가가 실패했습니다.'})
 
 @app.route("/api/store/post", methods=["PUT"])
 def update_store_post():
