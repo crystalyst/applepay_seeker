@@ -17,17 +17,10 @@ SECRET_KEY = 'sparta'
 
 @app.route('/')
 def home():
-    # print(request)
-    # print(request.cookies)
-    # print(request.cookies.get('token'))
-    token_receive = request.cookies.get('token')
-    # print(jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256']))
+    token_receive = request.cookies.get('mytoken')
     try:
-        # print(jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256']))
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
-        print(payload)
         user_info = db.user.find_one({"user_email": payload['email']})
-        print(type(user_info['user_name']))
         return render_template('index.html', user_name=user_info["user_name"], user_address_district=user_info["user_address_district"])
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
@@ -55,8 +48,7 @@ def api_register():
     user_email = request.form['user_email']
     user_name = request.form['user_name']
     user_pw = request.form['user_pw']
-    # print(request.form)
-    user_address_district = request.form['user_region']
+    user_address_district = request.form['user_address_district']
 
     pw_hash = hashlib.sha256(user_pw.encode('utf-8')).hexdigest()
 
@@ -102,8 +94,6 @@ def api_login():
             'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=3600)
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-        # print(payload)
-        # print(token)
         return jsonify({'status': 200, 'msg': '로그인이 완료되었습니다.', 'token': token})
     else:
         return jsonify({'status': 404, 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
