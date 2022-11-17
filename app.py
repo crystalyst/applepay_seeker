@@ -1,13 +1,12 @@
 import certifi
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from pymongo import MongoClient
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-from pymongo import MongoClient
-
 cert = certifi.where()
-client = MongoClient('mongodb+srv://test:sparta@cluster0.oix2hts.mongodb.net/?retryWrites=true&w=majority')
-db = client.dbsparta
+client = MongoClient('Replace with your Atlas Endpoint', tlsCAFile=cert)
+db = client.dbsparta # Replace with your collection name
 
 import jwt
 import datetime
@@ -281,7 +280,7 @@ def render_store_list_per_user():
         return {'state': 400, 'msg': 'Bad Request - Invalid Input from client'}
     except ValueError: # exception handling just in case args.get('user_id') takes empty string
         return {'state': 400, 'msg': 'Bad Request - No Such User Exists'}
-
+        
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

@@ -27,3 +27,6 @@ htmlcov/
 # Pipfile, Pipfile-lock
 Pipfile
 Pipfile.lock
+
+# dummy data store
+store_dummy.py
