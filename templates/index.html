@@ -340,7 +340,7 @@
                                 <div>${data[i]['store_address_full']}</div>
                                 <div>${data[i]['store_name']}</div>
                                 <div>${data[i]['store_like']}</div>
-                                <div>${data[i]['store_comment'].length}</div>
+                                <div>${data[i]['store_comment']}</div>
                             </div>
                         </li>
                     `
@@ -437,9 +437,13 @@
         return style
     }
 
-    let logout = () => {
+    function logout() {
         $.removeCookie('token', {path: '/'})
         window.location.href = '/login'
+    }
+
+    function routeToStoreAddPage() {
+        window.location.href = '/store/add'
     }
 </script>
 </body>
