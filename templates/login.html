@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="사과찾기"/>
+    <meta property="og:description" content="내 지역 애플페이 가맹점을 찾아보세요🍎"/>
+    <meta property="og:image" content=""/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    <title>find applepay store</title>
+    <style>
+        @font-face {
+            font-family: 'dunggeunmo';
+            font-weight: 400;
+            font-style: normal;
+            src: url('//tistory4.daumcdn.net/tistory/214191/skin/images/NeoDunggeunmo.ttf') format('truetype');
+        }
+
+        body {
+            font-family: 'dunggeunmo';
+        }
+
+        .wrapper {
+            background-color: #cccccc;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .header {
+            position: relative;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid darkgray;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon {
+            display: block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .sub_title > .icon {
+            margin-right: 10px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main_content {
+            text-align: center;
+        }
+
+        .main_text {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn_wrapper {
+            margin-top: 20px;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .show_login_btn, .show_register_btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .login_modal, .register_modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-top: -300px;
+            margin-left: -250px;
+            max-width: 500px;
+            width: 95%;
+            height: 600px;
+            padding: 20px;
+            background-color: #cccccc;
+            border-left: 3px solid darkgray;
+            border-top: 3px solid #eeeeee;
+            border-bottom: 3px solid #333333;
+            border-right: 3px solid #777777;
+        }
+
+        .modal_header {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal_content {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        input {
+            margin-bottom: 10px;
+        }
+
+        .validate_msg {
+            display: none;
+            color: red;
+            font-size: 10px;
+        }
+
+        .check_msg {
+            display: none;
+            color: blue;
+            font-size: 10px;
+        }
+
+        .login_btn, .register_btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .close_btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+
+    <script>
+        const districtList = [
+            '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+            '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+            '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'
+        ]
+
+        function login() {
+            $.ajax({
+                type: 'POST',
+                url: '/api/login',
+                data: {
+                    user_email: $('.login_email_input').val(),
+                    user_pw: $('.login_password_input').val()
+                },
+                success: function(response) {
+                    if (response['state'] > 200) {
+                        alert(response['msg'])
+                        window.location.href = '/login'
+                        return
+                    }
+                    
+                    $.cookie('mytoken', response['token'])
+                    window.location.href = '/'
+                }
+            })
+        }
+
+        function register() {
+            $.ajax({
+                type: 'POST',
+                url: '/api/register',
+                data: {
+                    user_email: $('.register_email_input').val(),
+                    user_name: $('.register_nickname_input').val(),
+                    user_pw: $('.register_password_input').val(),
+                    user_address_district: $('option:selected').val()
+                },
+                success: function(response) {
+                    alert(response['msg'])
+                    window.location.href = '/login'
+                }
+            })
+        }
+
+        let isValidLoginEmail, isValidLoginPW = false
+        function validateLoginEmail() {
+            let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}')
+            if (regex.test($('.login_email_input').val())) {
+                isValidLoginEmail = true
+                $('.validate_msg.login.email').hide()
+                return
+            }
+
+            isValidLoginEmail = false
+            $('.validate_msg.login.email').show()
+        }
+
+        function validateLoginPassword() {
+            let regex = new RegExp('^(?=.*[0-9])(?=.*[a-zA-z]).{8,}$')
+            if (regex.test($('.login_password_input').val())) {
+                isValidLoginPW = true
+                $('.validate_msg.login.pw').hide()
+                return
+            }
+
+            isValidLoginPW = false
+            $('.validate_msg.login.pw').show()
+        }
+
+        function validateLogin() {
+            let isValid
+            isValidLoginEmail&&isValidLoginPW ? isValid = true : isValid = false
+            $('.login_btn').attr('disabled', !isValid)
+        }
+
+        let isValidRegisterEmail, isValidNickName, isValidRegisterPW, isValidRegisterPWCheck = false
+        function validateRegisterEmail() {
+            let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}')
+            if (regex.test($('.register_email_input').val())) {
+                $('.validate_msg.register.email').hide()
+                $('.email_check_btn').attr('disabled', false)
+                return
+            }
+
+            $('.validate_msg.register.email').show()
+            $('.email_check_btn').attr('disabled', true)
+        }
+
+        function checkRegisterEmail() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/email/check',
+                data: {
+                    user_email: $('.register_email_input').val()
+                },
+                success: function(response) {
+                    if(response['state'] > 200) {
+                        alert(response['msg'])
+                        isValidRegisterEmail = false
+                        $('.check_msg.register.email').hide()
+                        return
+                    }
+
+                    alert(response['msg'])
+                    isValidRegisterEmail = true
+                    $('.check_msg.register.email').show()
+                }
+            })
+        }
+
+        function validateRegisterNickname() {
+            let nickname = $('.register_nickname_input').val()
+            if(nickname.length > 0) {
+                isValidNickName = true
+                $('.validate_msg.register.nickname').hide()
+                $('.nickname_check_btn').attr('disabled', false)
+                return
+            }
+
+            isValidNickName = false
+            $('.validate_msg.register.nickname').show()
+            $('.nickname_check_btn').attr('disabled', true)
+        }
+
+        function checkRegisterNickname() {
+            $.ajax({
+                type: 'GET',
+                url: '/api/name/check',
+                data: {
+                    user_name: $('.register_nickname_input').val()
+                },
+                success: function(response) {
+                    if(response['state'] > 200) {
+                        alert(response['msg'])
+                        isValidNickName = false
+                        $('.check_msg.register.nickname').hide()
+                        return
+                    }
+
+                    alert(response['msg'])
+                    isValidNickName = true
+                    $('.check_msg.register.nickname').show()
+                }
+            })
+        }
+
+        function validateRegisterPassword() {
+            let regex = new RegExp('^(?=.*[0-9])(?=.*[a-zA-z]).{8,}$')
+            if (regex.test($('.register_password_input').val())) {
+                isValidRegisterPW = true
+                $('.validate_msg.register.pw').hide()
+                return
+            }
+
+            isValidRegisterPW = false
+            $('.validate_msg.register.pw').show()
+        }
+
+        function validateRegisterPasswordCheck() {
+            let pw = $('.register_password_input').val()
+            let pwcheck = $('.register_password_check_input').val()
+            if(pw == pwcheck) {
+                isValidRegisterPWCheck = true
+                $('.validate_msg.register.pwcheck').hide()
+                return
+            }
+
+            isValidRegisterPWCheck = false
+            $('.validate_msg.register.pwcheck').show()
+        }
+
+        function validateRegister() {
+            let isValid
+            (isValidRegisterEmail && isValidNickName) && (isValidRegisterPW && isValidRegisterPWCheck) ? isValid = true : isValid = false
+            if ($('option:selected').val()) {
+                $('.validate_msg.register.district').hide()
+                $('.register_btn').attr('disabled', !isValid)
+                return
+            }
+
+            $('.validate_msg.register.district').show()
+            $('.register_btn').attr('disabled', true)
+        }
+
+        function showLogin() {
+            $('.login_modal').show()
+            $('.login_email_input').focus()
+        }
+
+        function showRegister() {
+            for(let i = 0; i < districtList.length; i++) {
+                let temp_html = `
+                    <option value="${districtList[i]}">${districtList[i]}</option>
+                `
+                $('#selectDistrict').append(temp_html)
+            }
+            $('.register_modal').show()
+            $('.register_email_input').focus()
+        }
+
+        function hideLogin() {
+            $('.login_email_input').val('')
+            $('.login_password_input').val('')
+            $('.login_modal').hide()
+        }
+
+        function hideRegister() {
+            $('.register_email_input').val('')
+            $('.register_nickname_input').val('')
+            $('.register_password_input').val('')
+            $('.register_password_check_input').val('')
+            $('.register_modal').hide()
+        }
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h3 class="title">
+            <span style="margin-right: 10px;">사과</span>
+            <span class="icon">🍎</span>
+            <span style="margin-left: 10px;">찾기</span>
+        </h3>
+    </div>
+    <div class="content">
+        <div class="main_content">
+            <p>🚩 같이 찾아봐요</p>
+            <div class="main_text">
+                <p style="line-height: 80px; margin: 0 20px 0 0;">우리 동네</p>
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/5968/5968144.png"
+                    style="width: 80px"
+                />
+                <p style="line-height: 80px; margin: 0 0 0 20px;">가맹점!</p>
+            </div>
+            <div class="btn_wrapper">
+                <button class="show_login_btn" onclick="showLogin()">로그인</button>
+                <button class="show_register_btn" onclick="showRegister()">회원가입</button>
+            </div>
+        </div>
+        <div class="login_modal">
+            <div class="modal_header">
+                <span class="icon">🔑</span>
+                <div class="modal_title">로그인</div>
+            </div>
+            <div class="close_btn">
+                <button onclick="hideLogin()" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="modal_content">
+                <div>
+                    <p>아이디</p>
+                    <input onkeydown="validateLoginEmail()" onkeyup="validateLogin()" class="login_email_input" type="text" placeholder="이메일을 입력해주세요."/>
+                    <p class="validate_msg login email">올바르지 않은 이메일 형식입니다.</p>
+                </div>
+                <div>
+                    <p>비밀번호</p>
+                    <input onkeydown="validateLoginPassword()" onkeyup="validateLogin()" class="login_password_input" type="password" placeholder="비밀번호를 입력해주세요."/>
+                    <p class="validate_msg login pw">비밀번호는 한글, 영문, 숫자 혼합 8자 이상 입니다.</p>
+                </div>
+                <button disabled class="login_btn" onclick="login()">로그인</button>
+            </div>
+        </div>
+        <div class="register_modal">
+            <div class="modal_header">
+                <span class="icon">🤝</span>
+                <div class="modal_title">회원 가입</div>
+            </div>
+            <div class="close_btn">
+                <button onclick="hideRegister()" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="modal_content">
+                <div>
+                    <p>아이디</p>
+                    <input onkeydown="validateRegisterEmail()" onkeyup="validateRegister()" class="register_email_input" type="text" placeholder="이메일을 입력해주세요."/>
+                    <button class="email_check_btn" disabled onclick="checkRegisterEmail()">중복 확인</button>
+                    <p class="validate_msg register email">올바르지 않은 이메일 형식입니다.</p>
+                    <p class="check_msg register email">사용가능한 이메일 입니다.</p>
+                </div>
+                <div>
+                    <p>닉네임</p>
+                    <input onkeydown="validateRegisterNickname()" onkeyup="validateRegister()" class="register_nickname_input" type="text" placeholder="닉네임을 입력해주세요."/>
+                    <button class="nickname_check_btn" disabled onclick="checkRegisterNickname()">중복 확인</button>
+                    <p class="validate_msg register nickname">닉네임을 공백 없이 1글자 이상 입력해주세요.</p>
+                    <p class="check_msg register nickname">사용가능한 닉네임 입니다.</p>
+                </div>
+                <div>
+                    <p>비밀번호</p>
+                    <input onkeydown="validateRegisterPassword()" onkeyup="validateRegister()" class="register_password_input" type="password" placeholder="비밀번호를 입력해주세요."/>
+                    <p class="validate_msg register pw">비밀번호는 한글, 영문, 특수문자 혼합 4자 이상 입니다.</p>
+                </div>
+                <div>
+                    <p>비밀번호 확인</p>
+                    <input onkeyup="validateRegisterPasswordCheck()" onchange="validateRegister()" class="register_password_check_input" type="password"
+                           placeholder="비밀번호를 다시 한 번 입력해주세요."/>
+                    <p class="validate_msg register pwcheck">비밀번호가 일치하지 않습니다.</p>
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="selectDistrict">관심 지역</label>
+                    <select class="form-select" id="selectDistrict">
+                        <option selected>관심지역을 선택해주세요</option>
+                    </select>
+                    <p class="validate_msg register district">관심지역 선택은 필수입니다.</p>
+                </div>
+                <button disabled class="register_btn" onclick="register()">회원가입</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
