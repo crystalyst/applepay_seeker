@@ -2,6 +2,7 @@ from base64 import b64decode
 
 import certifi
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+
 app = Flask(__name__)
 
 from pymongo import MongoClient
